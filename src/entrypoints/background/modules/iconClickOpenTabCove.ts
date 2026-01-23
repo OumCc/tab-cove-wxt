@@ -1,7 +1,7 @@
-export default defineBackground(() => {
-  console.log('Hello background!', { id: browser.runtime.id });
-
-  // 监听插件图标点击事件
+/**
+ * 监听插件图标点击事件
+ */
+export const iconClickOpenTabCove = () => {
   browser.action.onClicked.addListener(async () => {
     // 打开 tabs 页面
     // @ts-ignore - WXT 类型定义限制，但运行时支持任意入口点 URL
@@ -24,4 +24,4 @@ export default defineBackground(() => {
       await browser.tabs.create({ url: tabsUrl });
     }
   });
-});
+};
