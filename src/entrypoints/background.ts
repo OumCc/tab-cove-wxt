@@ -5,7 +5,7 @@ export default defineBackground(() => {
   browser.action.onClicked.addListener(async () => {
     // 打开 tabs 页面
     // @ts-ignore - WXT 类型定义限制，但运行时支持任意入口点 URL
-    const tabsUrl = browser.runtime.getURL('/cove.html');
+    const tabsUrl = browser.runtime.getURL('/tabCove.html');
     
     // 检查是否已经打开了 tabs 页面
     const existingTabs = await browser.tabs.query({ url: tabsUrl });
