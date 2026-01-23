@@ -12,4 +12,22 @@ export default defineConfig({
     permissions: ['tabs'],
     action: {},
   },
+
+  vite: ({ mode } : { mode: string}) => {
+    console.log('vite mode :>> ', mode);
+
+    return {
+      css: {
+        preprocessorOptions: {
+          less: {
+            javascriptEnabled: true,
+          },
+        },
+        modules: {
+          localsConvention: 'dashes',
+          generateScopedName: mode === 'production' ? '[hash:base64]' : '[folder]__[local]--[hash:base64:5]',
+        },
+      },
+    };
+  },
 });
