@@ -1,8 +1,10 @@
 import { Button, Popover, Text, Loader, Checkbox, Stack, } from '@mantine/core';
 
+import WindowCatalog from './components/WindowCatalog';
+
 import styles from './index.module.less';
 
-export default function home() {
+const home = () => {
   return (
     <div className={styles.page}>
       <div className={styles.page__left}></div>
@@ -35,7 +37,11 @@ export default function home() {
 
         <div className={styles.testRem}></div>
       </div>
-      <div className={styles.page__right}></div>
+      <div className={styles.page__right}>
+        <WindowCatalog />
+      </div>
     </div>
   );
 }
+
+export default home;
