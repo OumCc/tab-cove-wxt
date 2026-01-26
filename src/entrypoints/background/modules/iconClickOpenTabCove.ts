@@ -1,7 +1,7 @@
 /**
  * 监听插件图标点击事件，点击打开 tabCove 自定义标签页面
  */
-export const iconClickOpenTabCove = () => {
+export default () => {
   browser.action.onClicked.addListener(async () => {
     // 打开 tabs 页面
     // @ts-ignore - WXT 类型定义限制，但运行时支持任意入口点 URL
