@@ -1,5 +1,5 @@
 /**
- * 监听插件图标点击事件
+ * 监听插件图标点击事件，点击打开 tabCove 自定义标签页面
  */
 export const iconClickOpenTabCove = () => {
   browser.action.onClicked.addListener(async () => {
