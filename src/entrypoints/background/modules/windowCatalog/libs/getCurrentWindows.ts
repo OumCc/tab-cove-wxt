@@ -1,4 +1,4 @@
-import type { TabInfo, WindowInfo } from '../types';
+import type { WindowInfo } from '../types';
 
 export default async function getCurrentWindows(): Promise<WindowInfo[]> {
   try {
@@ -8,23 +8,30 @@ export default async function getCurrentWindows(): Promise<WindowInfo[]> {
     });
 
     return await Promise.all(
-      allWindows.map(async (window) => {
-        const fullTabs = await browser.tabs.query({ windowId: window.id });
+      allWindows
+        .filter((window): window is typeof window & { id: number } => window.id !== undefined)
+        .map(async (window) => {
+          const fullTabs = await browser.tabs.query({ windowId: window.id });
 
-        return {
-          id: window.id,
-          tabs: fullTabs.map((tab) => ({
-            id: tab.id,
-            url: tab.url,
-            title: tab.title,
-            windowId: tab.windowId,
-            index: tab.index,
-            favIconUrl: tab.favIconUrl,
-          })),
-        };
-      })
+          return {
+            id: window.id,
+            tabs: fullTabs
+              .filter((tab): tab is typeof tab & { id: number; url: string; title: string } => 
+                tab.id !== undefined && tab.url !== undefined && tab.title !== undefined
+              )
+              .map((tab) => ({
+                id: tab.id,
+                url: tab.url,
+                title: tab.title,
+                windowId: tab.windowId,
+                index: tab.index,
+                favIconUrl: tab.favIconUrl,
+              })),
+          };
+        })
     );
   } catch (error) {
     console.error('getCurrentWindows error :>> ', error);
+    return [];
   }
 }
