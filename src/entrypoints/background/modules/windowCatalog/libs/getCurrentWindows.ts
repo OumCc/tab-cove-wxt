@@ -33,7 +33,7 @@ export default async (): Promise<WindowInfo[]> => {
         })
     );
 
-    console.log('windowInfos :>> ', windowInfos);
+    // console.log('windowInfos :>> ', windowInfos);
     return windowInfos;
   } catch (error) {
     console.error('getCurrentWindows error :>> ', error);
