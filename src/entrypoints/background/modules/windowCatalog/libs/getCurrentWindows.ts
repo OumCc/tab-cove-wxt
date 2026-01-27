@@ -1,5 +1,7 @@
 import type { WindowInfo } from '../types';
 
+import shouldIncludeTab from '../utils/shouldIncludeTab';
+
 export default async (): Promise<WindowInfo[]> => {
   try {
     const allWindows = await browser.windows.getAll({
@@ -16,8 +18,8 @@ export default async (): Promise<WindowInfo[]> => {
           return {
             id: window.id,
             tabs: fullTabs
-              .filter((tab): tab is typeof tab & { id: number; url: string; title: string } => 
-                tab.id !== undefined && tab.url !== undefined && tab.title !== undefined
+              .filter((tab): tab is typeof tab & { id: number; url: string; title: string } =>
+                tab.id !== undefined && tab.title !== undefined && tab.url !== undefined && shouldIncludeTab(tab.url)
               )
               .map((tab) => ({
                 id: tab.id,
