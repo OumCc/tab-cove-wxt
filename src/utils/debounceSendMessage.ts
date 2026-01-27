@@ -16,6 +16,7 @@ export function createDebouncedSender(
     try {
       return await sendMessage(...args);
     } catch (error) {
+      // FIXME:  如果没有接收端时调用 sendMessage 接口，这里会报错：Error: Could not establish connection. Receiving end does not exist.
       console.error('防抖消息发送失败:', error);
       throw error;
     }
