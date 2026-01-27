@@ -1,13 +1,13 @@
 import type { WindowInfo } from '../types';
 
-export default async function getCurrentWindows(): Promise<WindowInfo[]> {
+export default async (): Promise<WindowInfo[]> => {
   try {
     const allWindows = await browser.windows.getAll({
       populate: false, // 若设为 true，会直接返回窗口+tabs，但部分场景信息不全。比如，缺少 TabInfo 中的 title、url、favIconUrl
       windowTypes: ['normal']
     });
 
-    return await Promise.all(
+    const windows = await Promise.all(
       allWindows
         .filter((window): window is typeof window & { id: number } => window.id !== undefined)
         .map(async (window) => {
@@ -30,6 +30,9 @@ export default async function getCurrentWindows(): Promise<WindowInfo[]> {
           };
         })
     );
+
+    console.log('windows :>> ', windows);
+    return windows;
   } catch (error) {
     console.error('getCurrentWindows error :>> ', error);
     return [];
