@@ -10,9 +10,13 @@ import styles from './index.module.less';
 export default (props: any) => {
   useEffect(() => {
     getWindowInfo();
-    onMessage('WC_updateWindowInfo', (message) => {
+    const stopListening = onMessage('WC_updateWindowInfo', (message) => {
       console.log('WC_updateWindowInfo message :>> ', message);
     });
+
+    return () => {
+      stopListening();
+    };
   }, []);
 
   const getWindowInfo = async () => {
