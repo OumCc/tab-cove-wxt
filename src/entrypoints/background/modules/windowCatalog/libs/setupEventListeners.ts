@@ -56,14 +56,4 @@ export default () => {
     console.log('tabs onActivated :>> ');
     broadcastWindowInfoIfListening();
   });
-
-  // 测试防抖
-  browser.tabs.onDetached.addListener(async (tab) => {
-    console.log('tabs onDetached :>> ');
-    broadcastWindowInfoIfListening();
-  });
-  browser.tabs.onAttached.addListener(async (tab) => {
-    console.log('tabs onAttached :>> ');
-    broadcastWindowInfoIfListening();
-  });
 };
