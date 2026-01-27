@@ -1,18 +1,25 @@
 /*
  * @Description: 
  */
-import { useEffect, } from 'react';
+import { useEffect, useState, } from 'react';
 import { Accordion } from '@mantine/core';
 
 import { sendMessage, onMessage } from '~/types/messaging';
+import type { WindowInfo } from '~/entrypoints/background/modules/windowCatalog/types';
 
 import styles from './index.module.less';
 
 export default (props: any) => {
+  const [windowInfo, setWindowInfo] = useState<WindowInfo[]>([]);
+  const [accordionValue, setAccordionValue] = useState<string[]>([]);
+
   useEffect(() => {
     getWindowInfo();
     const stopListening = onMessage('WC_updateWindowInfo', (message) => {
       console.log('WC_updateWindowInfo message :>> ', message);
+
+      setWindowInfo(message.data);
+      setAccordionValue(message.data.map((item: WindowInfo) => `item-${item.id}`));
     });
 
     return () => {
@@ -23,6 +30,8 @@ export default (props: any) => {
   const getWindowInfo = async () => {
     const res = await sendMessage('WC_getWindowInfo');
     console.log('getWindowInfo res :>> ', res);
+    setWindowInfo(res);
+    setAccordionValue(res.map((item: WindowInfo) => `item-${item.id}`));
   };
 
   return (
@@ -31,22 +40,22 @@ export default (props: any) => {
         variant="separated"
         radius="lg"
         multiple // 关键属性：允许同时展开多个项目
-        defaultValue={["item-1", "item-2", "item-3"]} // 关键属性：指定默认展开所有项目
+        value={accordionValue}
+        onChange={setAccordionValue}
       >
-        <Accordion.Item value="item-1">
-          <Accordion.Control>第一项标题</Accordion.Control>
-          <Accordion.Panel>第一项内容</Accordion.Panel>
-        </Accordion.Item>
-
-        <Accordion.Item value="item-2">
-          <Accordion.Control>第二项标题</Accordion.Control>
-          <Accordion.Panel>第二项内容</Accordion.Panel>
-        </Accordion.Item>
-
-        <Accordion.Item value="item-3">
-          <Accordion.Control>第三项标题</Accordion.Control>
-          <Accordion.Panel>第三项内容</Accordion.Panel>
-        </Accordion.Item>
+        {
+          windowInfo.map((item) => (
+            <Accordion.Item key={item.id} value={`item-${item.id}`}>
+              <Accordion.Control>{item.id}</Accordion.Control>
+              {
+                item.tabs.map((tab) => (
+                  <Accordion.Panel key={tab.id}>{tab.title}</Accordion.Panel>
+                ))
+              }
+              
+            </Accordion.Item>
+          ))
+        }
       </Accordion>
     </div>
   );
