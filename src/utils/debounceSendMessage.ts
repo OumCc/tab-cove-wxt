@@ -8,15 +8,12 @@ import { sendMessage } from '~/types/messaging';
  * @param options lodash debounce 的选项（可选）
  * @returns 防抖后的消息发送函数
  */
-export function createDebouncedSender<T extends (...args: any[]) => any>(
+export function createDebouncedSender(
   wait: number,
   options?: DebounceSettings
 ) {
-  // 直接返回防抖处理后的函数
-  return debounce<T>(async (...args: Parameters<T>) => {
+  return debounce(async (...args: Parameters<typeof sendMessage>) => {
     try {
-      // 这里直接调用原始的 sendMessage
-      // 您可以根据实际调用方式调整参数
       return await sendMessage(...args);
     } catch (error) {
       console.error('防抖消息发送失败:', error);
