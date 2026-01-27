@@ -51,6 +51,18 @@ export default () => {
   browser.tabs.onActivated.addListener(async (tab) => {
     console.log('tabs onActivated :>> ');
 
-    
+    sendMessage('WC_updateWindowInfo', await getCurrentWindows());
+  });
+
+  // 测试防抖
+  browser.tabs.onDetached.addListener(async (tab) => {
+    console.log('tabs onDetached :>> ');
+
+    sendMessage('WC_updateWindowInfo', await getCurrentWindows());
+  });
+  browser.tabs.onAttached.addListener(async (tab) => {
+    console.log('tabs onAttached :>> ');
+
+    sendMessage('WC_updateWindowInfo', await getCurrentWindows());
   });
 };
