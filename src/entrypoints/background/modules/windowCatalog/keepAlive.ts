@@ -12,4 +12,4 @@ export default () => {
       console.log('[Background] Keep-alive heartbeat');
     }
   });
-}
+};

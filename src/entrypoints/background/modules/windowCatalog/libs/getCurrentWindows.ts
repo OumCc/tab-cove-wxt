@@ -39,4 +39,4 @@ export default async (): Promise<WindowInfo[]> => {
     console.error('getCurrentWindows error :>> ', error);
     return [];
   }
-}
+};

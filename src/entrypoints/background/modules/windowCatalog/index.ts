@@ -1,7 +1,7 @@
-import getCurrentWindows from './libs/getCurrentWindows';
 import setupEventListeners from './libs/setupEventListeners';
+import setupMessageListeners from './libs/setupMessageListeners';
 
-export default async () => {
-  await getCurrentWindows();
+export default () => {
   setupEventListeners();
+  setupMessageListeners();
 };
