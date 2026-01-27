@@ -1,4 +1,4 @@
-import keepAlive from './modules/windowCatalog/keepAlive';
+import keepAlive from './modules/keepAlive';
 import iconClickOpenTabCove from './modules/iconClickOpenTabCove';
 import windowCatalog from './modules/windowCatalog';
 
