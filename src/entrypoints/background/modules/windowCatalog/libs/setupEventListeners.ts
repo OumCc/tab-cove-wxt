@@ -1,4 +1,4 @@
-import { sendMessage } from '~/types/messaging';
+import { debounceSendMessage } from '~/utils/debounceSendMessage';
 
 import getCurrentWindows from './getCurrentWindows';
 
@@ -9,13 +9,13 @@ export default () => {
   browser.windows.onCreated.addListener(async () => {
     console.log('windows onCreated :>> ');
 
-    sendMessage('WC_updateWindowInfo', await getCurrentWindows());
+    debounceSendMessage('WC_updateWindowInfo', await getCurrentWindows());
   });
 
   browser.windows.onRemoved.addListener(async () => {
     console.log('windows onRemoved :>> ');
 
-    sendMessage('WC_updateWindowInfo', await getCurrentWindows());
+    debounceSendMessage('WC_updateWindowInfo', await getCurrentWindows());
   });
 
 
@@ -25,13 +25,13 @@ export default () => {
   browser.tabs.onCreated.addListener(async (tab) => {
     console.log('tabs onCreated :>> ');
 
-    sendMessage('WC_updateWindowInfo', await getCurrentWindows());
+    debounceSendMessage('WC_updateWindowInfo', await getCurrentWindows());
   });
 
   browser.tabs.onRemoved.addListener(async (tab) => {
     console.log('tabs onRemoved :>> ');
 
-    sendMessage('WC_updateWindowInfo', await getCurrentWindows());
+    debounceSendMessage('WC_updateWindowInfo', await getCurrentWindows());
   });
 
   // 当标签页的属性发生变化时触发，例如URL、加载状态或标题改变
@@ -43,7 +43,7 @@ export default () => {
   browser.tabs.onMoved.addListener(async (tab) => {
     console.log('tabs onMoved :>> ');
 
-    sendMessage('WC_updateWindowInfo', await getCurrentWindows());
+    debounceSendMessage('WC_updateWindowInfo', await getCurrentWindows());
   });
 
   // 当用户切换到一个新的标签页，使其成为窗口中的活动标签时触发
@@ -51,18 +51,18 @@ export default () => {
   browser.tabs.onActivated.addListener(async (tab) => {
     console.log('tabs onActivated :>> ');
 
-    sendMessage('WC_updateWindowInfo', await getCurrentWindows());
+    debounceSendMessage('WC_updateWindowInfo', await getCurrentWindows());
   });
 
   // 测试防抖
   browser.tabs.onDetached.addListener(async (tab) => {
     console.log('tabs onDetached :>> ');
 
-    sendMessage('WC_updateWindowInfo', await getCurrentWindows());
+    debounceSendMessage('WC_updateWindowInfo', await getCurrentWindows());
   });
   browser.tabs.onAttached.addListener(async (tab) => {
     console.log('tabs onAttached :>> ');
 
-    sendMessage('WC_updateWindowInfo', await getCurrentWindows());
+    debounceSendMessage('WC_updateWindowInfo', await getCurrentWindows());
   });
 };
