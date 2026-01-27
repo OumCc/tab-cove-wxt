@@ -7,7 +7,7 @@ export default defineConfig({
   srcDir: 'src',
 
   manifest: {
-    permissions: [ 'tabs', 'windows', ],
+    permissions: [ 'tabs', 'windows', 'alarms' ],
     action: {},
   },
 
