@@ -4,7 +4,7 @@ import WindowCatalog from './components/WindowCatalog';
 
 import styles from './index.module.less';
 
-const home = () => {
+export default () => {
   return (
     <div className={styles.page}>
       <div className={styles.page__left}></div>
@@ -43,5 +43,3 @@ const home = () => {
     </div>
   );
 }
-
-export default home;
