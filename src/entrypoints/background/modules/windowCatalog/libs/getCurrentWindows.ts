@@ -9,7 +9,7 @@ export default async (): Promise<WindowInfo[]> => {
       windowTypes: ['normal']
     });
 
-    const windows = await Promise.all(
+    const windowInfos = await Promise.all(
       allWindows
         .filter((window): window is typeof window & { id: number } => window.id !== undefined)
         .map(async (window) => {
@@ -33,8 +33,8 @@ export default async (): Promise<WindowInfo[]> => {
         })
     );
 
-    console.log('windows :>> ', windows);
-    return windows;
+    console.log('windowInfos :>> ', windowInfos);
+    return windowInfos;
   } catch (error) {
     console.error('getCurrentWindows error :>> ', error);
     return [];
