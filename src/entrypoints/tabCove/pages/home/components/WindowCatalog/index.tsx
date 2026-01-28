@@ -1,5 +1,6 @@
 /*
- * @Description: 
+ * @Description: 窗口目录
+ *    展示当前浏览器打开的所有窗口，以及每个窗口包含的所有标签页
  */
 import { useEffect, useState, } from 'react';
 import { Accordion } from '@mantine/core';

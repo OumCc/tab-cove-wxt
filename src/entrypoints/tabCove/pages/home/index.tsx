@@ -1,5 +1,6 @@
 import { Button, Popover, Text, Loader, Checkbox, Stack, } from '@mantine/core';
 
+import UserMenu from './components/UserMenu';
 import WindowCatalog from './components/WindowCatalog';
 
 import styles from './index.module.less';
@@ -7,7 +8,9 @@ import styles from './index.module.less';
 export default () => {
   return (
     <div className={styles.page}>
-      <div className={styles.page__left}></div>
+      <div className={styles.page__left}>
+        <UserMenu />
+      </div>
       <div className={styles.page__center}>
         <Stack
           h={300}
