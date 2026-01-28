@@ -5,13 +5,14 @@
 import { create, type StateCreator } from 'zustand';
 import { devtools, } from 'zustand/middleware';
 
+import type { User } from '~/types/core';
+
 interface UsersStore {
-  // userInfo: any;
-  // getCurrentUserLoading: boolean;
+  users: User[];
 };
 
 const usersStore: StateCreator<UsersStore> = () => ({
-  // userInfo: null, // 暂时用不上这个用户信息，getCurrentUser目前只是用来判断是否登录态是否失效
+  users: [], // 暂时用不上这个用户信息，getCurrentUser目前只是用来判断是否登录态是否失效
   // getCurrentUserLoading: false,
   // getCurrentUser: async () => {
   //   try {
