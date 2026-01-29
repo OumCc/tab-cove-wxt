@@ -9,44 +9,44 @@ import { notifications } from '@mantine/notifications';
 import { IconExclamationCircle } from '@tabler/icons-react';
 
 import { useGlobalStore, } from '~/store/global';
-import { useUserStore, } from '@/store/teams';
+import { useTeamsStore, } from '@/store/teams';
 
 export default () => {
-  const openAddUsersModal = useGlobalStore(state => state.openAddUsersModal);
-  const addUsersLoading = useUserStore(state => state.addUsersLoading);
+  const openAddTeamsModal = useGlobalStore(state => state.openAddTeamsModal);
+  const addTeamsLoading = useTeamsStore(state => state.addTeamsLoading);
 
-  const { setOpenAddUsersModal,} = useGlobalStore(useShallow(state => ({
-    setOpenAddUsersModal: state.setOpenAddUsersModal,
+  const { setOpenAddTeamsModal,} = useGlobalStore(useShallow(state => ({
+    setOpenAddTeamsModal: state.setOpenAddTeamsModal,
   })));
-  const { addUsers,} = useUserStore(useShallow(state => ({
-    addUsers: state.addUsers,
+  const { addTeams,} = useTeamsStore(useShallow(state => ({
+    addTeams: state.addTeams,
   })));
 
-  const [userName, setUserName] = useState('');
+  const [teamName, setTeamName] = useState('');
 
   const handleClose = () => {
-    setOpenAddUsersModal(false);
+    setOpenAddTeamsModal(false);
   }
 
   return (
     <Modal
-      opened={openAddUsersModal}
+      opened={openAddTeamsModal}
       onClose={handleClose}
-      title="新增用户"
+      title="新增团队"
     >
       <Stack gap="lg">
         <TextInput
-          label="用户名"
-          placeholder="请输入用户名"
-          value={userName}
-          onChange={(event) => setUserName(event.target.value)}
+          label="团队名"
+          placeholder="请输入团队名"
+          value={teamName}
+          onChange={(event) => setTeamName(event.target.value)}
         />
         <Button
-          loading={addUsersLoading}
+          loading={addTeamsLoading}
           onClick={async () => {
-            if (!userName) {
+            if (!teamName) {
               notifications.show({
-                message: '请输入用户名',
+                message: '请输入团队名',
                 position: 'top-center',
                 icon: <IconExclamationCircle />,
                 color: '#faad14'
@@ -54,9 +54,9 @@ export default () => {
               return;
             }
 
-            await addUsers({
+            await addTeams({
               _id: nanoid(),
-              name: userName,
+              name: teamName,
             });
             handleClose();
           }}

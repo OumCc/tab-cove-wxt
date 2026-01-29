@@ -8,35 +8,31 @@ import { Button } from '@mantine/core';
 import Empty from '~/components/Empty';
 
 import { useGlobalStore, } from '~/store/global';
-import { useUserStore, } from '@/store/teams';
+import { useTeamsStore, } from '@/store/teams';
 
 import styles from './index.module.less';
 
 export default () => {
-  const { setOpenAddUsersModal,} = useGlobalStore(useShallow(state => ({
-    setOpenAddUsersModal: state.setOpenAddUsersModal,
+  const { setOpenAddTeamsModal,} = useGlobalStore(useShallow(state => ({
+    setOpenAddTeamsModal: state.setOpenAddTeamsModal,
   })));
   const {
-    users,
-    curUser,
-    setCurUser,
-    getUsers,
-  } = useUserStore(useShallow(state => ({
-    users: state.users,
-    curUser: state.curUser,
-    setCurUser: state.setCurUser,
-    getUsers: state.getUsers,
+    teams,
+    curTeam,
+  } = useTeamsStore(useShallow(state => ({
+    teams: state.teams,
+    curTeam: state.curTeam,
   })));
 
   const renderEmpty = () => {
     return (
-      <Empty description="还没添加用户呢，赶紧添加一个吧~">
+      <Empty description="还没团队呢，赶紧新建一个吧~">
         <Button
           onClick={() => {
-            setOpenAddUsersModal(true);
+            setOpenAddTeamsModal(true);
           }}
         >
-          添加用户
+          新建团队
         </Button>
       </Empty>
     );
@@ -45,7 +41,7 @@ export default () => {
   return (
     <div className={styles.box}>
       {
-        users.length ? null : renderEmpty()
+        teams.length ? null : renderEmpty()
       }
     </div>
   );
