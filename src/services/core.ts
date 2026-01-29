@@ -1,5 +1,4 @@
 import type { User, Space, SpaceMembership, Resource, } from '~/types/core';
-import { remove } from 'lodash-es';
 
 import { usersStorage, } from '~/utils/storage';
 
