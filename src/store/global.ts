@@ -5,14 +5,14 @@ import { create, type StateCreator } from 'zustand';
 import { devtools, } from 'zustand/middleware';
 
 interface GlobalStore {
-  openAddUsersModal: boolean;
-  setOpenAddUsersModal: (openAddUsersModal: boolean) => void;
+  openAddTeamsModal: boolean;
+  setOpenAddTeamsModal: (openAddTeamsModal: boolean) => void;
 };
 
 const globalStore: StateCreator<GlobalStore> = (set) => ({
-  openAddUsersModal: false,
-  setOpenAddUsersModal: (openAddUsersModal) => {
-    set({ openAddUsersModal });
+  openAddTeamsModal: false,
+  setOpenAddTeamsModal: (openAddTeamsModal) => {
+    set({ openAddTeamsModal });
   },
 });
 

@@ -1,5 +1,5 @@
-import TeamMenu from './components/TeamMenu';
-import AddUsersModal from './components/AddUsersModal';
+import TeamsMenu from './components/TeamsMenu';
+import AddTeamsModal from './components/AddTeamsModal';
 import Workbench from './components/Workbench';
 import WindowCatalog from './components/WindowCatalog';
 
@@ -10,7 +10,7 @@ export default () => {
     <>
       <div className={styles.page}>
         <div className={styles.page__left}>
-          <TeamMenu />
+          <TeamsMenu />
         </div>
 
         <div className={styles.page__center}>
@@ -22,7 +22,7 @@ export default () => {
         </div>
       </div>
 
-      <AddUsersModal />
+      <AddTeamsModal />
     </>
   );
 }

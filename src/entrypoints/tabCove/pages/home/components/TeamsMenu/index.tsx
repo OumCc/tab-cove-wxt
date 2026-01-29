@@ -16,8 +16,8 @@ export default () => {
   const getTeamsLoading = useTeamsStore(state => state.getTeamsLoading);
   const addTeamsLoading = useTeamsStore(state => state.addTeamsLoading);
 
-  const { setOpenAddUsersModal,} = useGlobalStore(useShallow(state => ({
-    setOpenAddUsersModal: state.setOpenAddUsersModal,
+  const { setOpenAddTeamsModal,} = useGlobalStore(useShallow(state => ({
+    setOpenAddTeamsModal: state.setOpenAddTeamsModal,
   })));
   const {
     teams,
@@ -60,7 +60,7 @@ export default () => {
         aria-label="Add User"
         loading={addTeamsLoading}
         onClick={() => {
-          setOpenAddUsersModal(true);
+          setOpenAddTeamsModal(true);
         }}
       >
         <IconPlus />
