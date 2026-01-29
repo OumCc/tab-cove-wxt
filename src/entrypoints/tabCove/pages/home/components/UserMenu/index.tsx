@@ -86,6 +86,10 @@ export default () => {
           <Button
             loading={addUsersLoading}
             onClick={async () => {
+              if (!userName) {
+                return;
+              }
+
               await addUsers({
                 _id: nanoid(),
                 name: userName,
