@@ -5,6 +5,8 @@ import { useState, } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { nanoid } from 'nanoid';
 import { Stack, Modal, TextInput, Button, } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
+import { IconExclamationCircle } from '@tabler/icons-react';
 
 import { useUserStore, } from '~/store/users';
 
@@ -36,6 +38,12 @@ export default () => {
           loading={addUsersLoading}
           onClick={async () => {
             if (!userName) {
+              notifications.show({
+                message: '请输入用户名',
+                position: 'top-center',
+                icon: <IconExclamationCircle />,
+                color: '#faad14'
+              })
               return;
             }
 
