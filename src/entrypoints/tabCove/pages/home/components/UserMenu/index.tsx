@@ -2,8 +2,10 @@
  * @Description: 用户菜单
  *    展示当前账号下创建的用户列表
  */
+import { useEffect, useState, } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { Stack, ActionIcon, Avatar, } from '@mantine/core';
+import { Stack, ActionIcon, Avatar, Modal, TextInput, Button, } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import { IconPlus } from '@tabler/icons-react';
 import { nanoid } from 'nanoid';
 
@@ -29,12 +31,15 @@ export default () => {
     addUsers: state.addUsers,
   })));
 
+  const [opened, { open, close }] = useDisclosure(false);
+  const [userName, setUserName] = useState('');
+
   useEffect(() => {
     getUsers();
   }, []);
 
   return (
-    <div>
+    <>
       <Stack
         align="center"
         justify="flex-start"
@@ -59,15 +64,39 @@ export default () => {
           aria-label="Add User"
           loading={addUsersLoading}
           onClick={() => {
-            addUsers({
-              _id: nanoid(),
-              name: '李大勇',
-            });
+            open();
           }}
         >
           <IconPlus />
         </ActionIcon>
       </Stack>
-    </div>
+
+      <Modal
+        opened={opened}
+        onClose={close}
+        title="新增用户"
+      >
+        <Stack gap="lg">
+          <TextInput
+            label="用户名"
+            placeholder="请输入用户名"
+            value={userName}
+            onChange={(event) => setUserName(event.target.value)}
+          />
+          <Button
+            loading={addUsersLoading}
+            onClick={async () => {
+              await addUsers({
+                _id: nanoid(),
+                name: userName,
+              });
+              close();
+            }}
+          >
+            提交
+          </Button>
+        </Stack>
+      </Modal>
+    </>
   );
 };
