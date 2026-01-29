@@ -7,6 +7,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { Stack, ActionIcon, Avatar, } from '@mantine/core';
 import { IconPlus } from '@tabler/icons-react';
 
+import { useGlobalStore, } from '~/store/global';
 import { useUserStore, } from '~/store/users';
 
 import styles from './index.module.less';
@@ -15,6 +16,9 @@ export default () => {
   const getUsersLoading = useUserStore(state => state.getUsersLoading);
   const addUsersLoading = useUserStore(state => state.addUsersLoading);
 
+  const { setOpenAddUsersModal,} = useGlobalStore(useShallow(state => ({
+    setOpenAddUsersModal: state.setOpenAddUsersModal,
+  })));
   const {
     users,
     curUser,
@@ -56,7 +60,7 @@ export default () => {
         aria-label="Add User"
         loading={addUsersLoading}
         onClick={() => {
-          open();
+          setOpenAddUsersModal(true);
         }}
       >
         <IconPlus />
