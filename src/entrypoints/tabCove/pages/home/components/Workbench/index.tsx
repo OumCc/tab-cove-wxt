@@ -25,6 +25,14 @@ export default () => {
     curTeam: state.curTeam,
   })));
 
+  const renderPanel = () => {
+    return (
+      <div className={styles.panel}>
+        <Deck />
+      </div>
+    );
+  }
+
   const renderEmpty = () => {
     return (
       <Empty description="还没团队呢，赶紧新建一个吧~">
@@ -42,11 +50,7 @@ export default () => {
   return (
     <div className={styles.box}>
       {
-        teams.length ? (
-          <div className={styles.panel}>
-            <Deck />
-          </div>
-        ) : renderEmpty()
+        teams.length ? renderPanel() : renderEmpty()
       }
     </div>
   );
