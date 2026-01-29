@@ -6,6 +6,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { Button } from '@mantine/core';
 
 import Empty from '~/components/Empty';
+import Deck from './Deck';
 
 import { useGlobalStore, } from '~/store/global';
 import { useTeamsStore, } from '@/store/teams';
@@ -41,7 +42,11 @@ export default () => {
   return (
     <div className={styles.box}>
       {
-        teams.length ? null : renderEmpty()
+        teams.length ? (
+          <div className={styles.panel}>
+            <Deck />
+          </div>
+        ) : renderEmpty()
       }
     </div>
   );
