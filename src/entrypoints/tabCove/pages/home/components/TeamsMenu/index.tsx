@@ -1,6 +1,6 @@
 /*
- * @Description: 用户菜单
- *    展示当前账号下创建的用户列表
+ * @Description: 团队菜单
+ *    展示当前账号下创建的团队列表
  */
 import { useEffect, } from 'react';
 import { useShallow } from 'zustand/react/shallow';
@@ -42,13 +42,13 @@ export default () => {
       gap="md"
     >
       {
-        teams.map((user) => (
+        teams.map((team) => (
           <Avatar
-            key={user._id}
-            src={user.avatar || undefined}
+            key={team._id}
+            src={team.avatar || undefined}
             color="initials"
             radius="xl"
-            name={user.name || ''}
+            name={team.name || ''}
           />
         ))
       }
@@ -57,7 +57,7 @@ export default () => {
         variant="subtle"
         size={38}
         radius="xl"
-        aria-label="Add User"
+        aria-label="Add Team"
         loading={addTeamsLoading}
         onClick={() => {
           setOpenAddTeamsModal(true);

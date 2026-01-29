@@ -1,5 +1,5 @@
 /*
- * @Description: 新增用户弹窗
+ * @Description: 新增团队弹窗
  */
 import { useState, } from 'react';
 import { useShallow } from 'zustand/react/shallow';

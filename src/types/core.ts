@@ -21,6 +21,6 @@ export interface SpaceMembership {
 export interface Resource {
   _id: string;
   spaceId: string;
-  createdBy: string; // 记录创建者的 userId
+  createdBy: string; // 记录创建者的 teamId
   urls: TabInfo[];
 }

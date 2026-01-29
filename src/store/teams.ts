@@ -18,10 +18,10 @@ interface TeamsStore {
   getTeams: () => Promise<Team[]>;
 
   addTeamsLoading: boolean;
-  addTeams: (user: Team) => Promise<void>;
+  addTeams: (team: Team) => Promise<void>;
 
   delTeamsLoading: boolean;
-  delTeams: (userId: string) => Promise<void>;
+  delTeams: (teamId: string) => Promise<void>;
 };
 
 const TeamsStore: StateCreator<TeamsStore> = (set) => ({
