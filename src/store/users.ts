@@ -10,9 +10,9 @@ import * as api from '~/services/core';
 
 interface UsersStore {
   users: User[];
-  curUserId: string | undefined;
+  curUser: User | undefined;
 
-  setCurUserId: (userId: string) => void;
+  setCurUser: (user: User) => void;
 
   getUsersLoading: boolean;
   getUsers: () => Promise<User[]>;
@@ -26,10 +26,10 @@ interface UsersStore {
 
 const usersStore: StateCreator<UsersStore> = (set) => ({
   users: [],
-  curUserId: undefined,
+  curUser: undefined,
 
-  setCurUserId: (userId: string) => {
-    set({ curUserId: userId, });
+  setCurUser: (user: User) => {
+    set({ curUser: user, });
   },
 
   getUsersLoading: false,
@@ -62,7 +62,7 @@ const usersStore: StateCreator<UsersStore> = (set) => ({
     try {
       set({ delUsersLoading: true, });
       await api.delUsers(userId);
-      
+
       set((state) => ({ users: state.users.filter((user) => user._id !== userId,), }));
     } finally {
       set({ delUsersLoading: false, });
