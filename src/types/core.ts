@@ -6,21 +6,36 @@ export interface Team {
   avatar?: string;
 }
 
+export interface User {
+  _id: string;
+  name: string;
+  avatar?: string;
+}
+
+export interface TeamMembership {
+  _id: string;
+  teamId: string;
+  userId: string;
+  role: 'owner' | 'admin' | 'member';
+}
+
 export interface Space {
   _id: string;
   name: string;
+  teamId: string; // space 所属的 team
+  createdBy: string; // space 的创建者的 userId
+  visibility: 'public' | 'protected' | 'private';
 }
 
-export interface SpaceMembership {
+export interface SpacePermission {
   _id: string;
-  teamId: string;
   spaceId: string;
-  role: 'admin' | 'full';
+  userId: string; // 被授权的用户
 }
 
 export interface Resource {
   _id: string;
+  name: string;
   spaceId: string;
-  createdBy: string; // 记录创建者的 teamId
   urls: TabInfo[];
 }
