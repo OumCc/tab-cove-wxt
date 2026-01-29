@@ -9,14 +9,21 @@ import type { User } from '~/types/core';
 
 interface UsersStore {
   users: User[];
+  curUserId: string | undefined;
+
+  getUsersLoading: boolean;
+  // getUsers: () => Promise<User[]>;
+  setCurUserId: (userId: string) => void;
 };
 
-const usersStore: StateCreator<UsersStore> = () => ({
-  users: [], // 暂时用不上这个用户信息，getCurrentUser目前只是用来判断是否登录态是否失效
-  // getCurrentUserLoading: false,
-  // getCurrentUser: async () => {
+const usersStore: StateCreator<UsersStore> = (set) => ({
+  users: [],
+  curUserId: undefined,
+
+  getUsersLoading: false,
+  // getUsers: async () => {
   //   try {
-  //     set({ getCurrentUserLoading: true, });
+  //     set({ getUsersLoading: true, });
   //     const res = await api.getCurrentUser();
 
   //     const { account, } = res.data || {};
@@ -25,9 +32,13 @@ const usersStore: StateCreator<UsersStore> = () => ({
 
   //     return res;
   //   } finally {
-  //     set({ getCurrentUserLoading: false, });
+  //     set({ getUsersLoading: false, });
   //   }
   // },
+
+  setCurUserId: (userId: string) => {
+    set({ curUserId: userId, });
+  },
 });
 
 export const useUserStore = create<UsersStore>()(
