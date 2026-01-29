@@ -51,7 +51,9 @@ const Empty = (props: EmptyProps) => {
 
       {
         children ? (
-          <div>{children}</div>
+          <div className={styles.children}>
+            {children}
+          </div>
         ) : null
       }
     </div>

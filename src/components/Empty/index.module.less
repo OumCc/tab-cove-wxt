@@ -2,6 +2,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
 }
 
 .block {
@@ -11,10 +12,18 @@
 
 .image {
   display: block;
+
+  width: 200px;
+  max-width: 100%;
+  max-height: 100%;
 }
 
 .description {
-  font-size: 14px;
+  font-size: var(--mantine-font-size-md);
 
   color: rgba(0, 0, 0, 0.45);
+}
+
+.children {
+  margin-top: var(--mantine-spacing-xl);
 }
