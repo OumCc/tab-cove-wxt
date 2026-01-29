@@ -3,7 +3,7 @@
  *    展示当前账号下创建的用户列表
  */
 import { useShallow } from 'zustand/react/shallow';
-import { ActionIcon, Avatar, } from '@mantine/core';
+import { Stack, ActionIcon, Avatar, } from '@mantine/core';
 import { IconPlus } from '@tabler/icons-react';
 import { nanoid } from 'nanoid';
 
@@ -35,35 +35,39 @@ export default () => {
 
   return (
     <div>
-      {
-        users.map((user) => (
-          <Avatar
-            key={user._id}
-            src={user.avatar || undefined}
-            color="initials"
-            radius="xl"
-            name={user.name || ''}
-          >
-            { user.name?.slice(0, 2).toUpperCase() }
-          </Avatar>
-        ))
-      }
-
-      <ActionIcon
-        variant="subtle"
-        size="lg"
-        radius="xl"
-        aria-label="Add User"
-        loading={addUsersLoading}
-        onClick={() => {
-          addUsers({
-            _id: nanoid(),
-            name: 'John Doe',
-          });
-        }}
+      <Stack
+        align="center"
+        justify="flex-start"
+        gap="md"
       >
-        <IconPlus />
-      </ActionIcon>
+        {
+          users.map((user) => (
+            <Avatar
+              key={user._id}
+              src={user.avatar || undefined}
+              color="initials"
+              radius="xl"
+              name={user.name || ''}
+            />
+          ))
+        }
+
+        <ActionIcon
+          variant="subtle"
+          size={38}
+          radius="xl"
+          aria-label="Add User"
+          loading={addUsersLoading}
+          onClick={() => {
+            addUsers({
+              _id: nanoid(),
+              name: '李大勇',
+            });
+          }}
+        >
+          <IconPlus />
+        </ActionIcon>
+      </Stack>
     </div>
   );
 };
