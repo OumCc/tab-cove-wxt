@@ -6,7 +6,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { Button } from '@mantine/core';
 
 import Empty from '~/components/Empty';
-import Deck from './Deck';
+import Spaces from './Spaces';
 
 import { useGlobalStore, } from '~/store/global';
 import { useTeamsStore, } from '@/store/teams';
@@ -28,7 +28,12 @@ export default () => {
   const renderPanel = () => {
     return (
       <div className={styles.panel}>
-        <Deck />
+        <div className={styles.panel__left}>
+          <Spaces />
+        </div>
+
+        <div className={styles.panel__right}>
+        </div>
       </div>
     );
   }
