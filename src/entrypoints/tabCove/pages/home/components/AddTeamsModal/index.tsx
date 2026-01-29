@@ -6,7 +6,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { nanoid } from 'nanoid';
 import { Stack, Modal, TextInput, Button, } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { IconExclamationCircle } from '@tabler/icons-react';
+import { IconExclamationMark } from '@tabler/icons-react';
 
 import { useGlobalStore, } from '~/store/global';
 import { useTeamsStore, } from '@/store/teams';
@@ -47,8 +47,8 @@ export default () => {
             if (!teamName) {
               notifications.show({
                 message: '请输入团队名',
-                position: 'top-center',
-                icon: <IconExclamationCircle />,
+                position: 'top-right',
+                icon: <IconExclamationMark />,
                 color: '#faad14'
               })
               return;
