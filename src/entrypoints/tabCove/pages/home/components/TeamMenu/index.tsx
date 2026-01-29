@@ -8,31 +8,31 @@ import { Stack, ActionIcon, Avatar, } from '@mantine/core';
 import { IconPlus } from '@tabler/icons-react';
 
 import { useGlobalStore, } from '~/store/global';
-import { useUserStore, } from '@/store/teams';
+import { useTeamsStore, } from '@/store/teams';
 
 import styles from './index.module.less';
 
 export default () => {
-  const getUsersLoading = useUserStore(state => state.getUsersLoading);
-  const addUsersLoading = useUserStore(state => state.addUsersLoading);
+  const getTeamsLoading = useTeamsStore(state => state.getTeamsLoading);
+  const addTeamsLoading = useTeamsStore(state => state.addTeamsLoading);
 
   const { setOpenAddUsersModal,} = useGlobalStore(useShallow(state => ({
     setOpenAddUsersModal: state.setOpenAddUsersModal,
   })));
   const {
-    users,
-    curUser,
-    setCurUser,
-    getUsers,
-  } = useUserStore(useShallow(state => ({
-    users: state.users,
-    curUser: state.curUser,
-    setCurUser: state.setCurUser,
-    getUsers: state.getUsers,
+    teams,
+    curTeam,
+    setCurTeam,
+    getTeams,
+  } = useTeamsStore(useShallow(state => ({
+    teams: state.teams,
+    curTeam: state.curTeam,
+    setCurTeam: state.setCurTeam,
+    getTeams: state.getTeams,
   })));
 
   useEffect(() => {
-    getUsers();
+    getTeams();
   }, []);
 
   return (
@@ -42,7 +42,7 @@ export default () => {
       gap="md"
     >
       {
-        users.map((user) => (
+        teams.map((user) => (
           <Avatar
             key={user._id}
             src={user.avatar || undefined}
@@ -58,7 +58,7 @@ export default () => {
         size={38}
         radius="xl"
         aria-label="Add User"
-        loading={addUsersLoading}
+        loading={addTeamsLoading}
         onClick={() => {
           setOpenAddUsersModal(true);
         }}

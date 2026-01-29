@@ -1,4 +1,4 @@
-import UserMenu from './components/UserMenu';
+import TeamMenu from './components/TeamMenu';
 import AddUsersModal from './components/AddUsersModal';
 import Workbench from './components/Workbench';
 import WindowCatalog from './components/WindowCatalog';
@@ -10,7 +10,7 @@ export default () => {
     <>
       <div className={styles.page}>
         <div className={styles.page__left}>
-          <UserMenu />
+          <TeamMenu />
         </div>
 
         <div className={styles.page__center}>
