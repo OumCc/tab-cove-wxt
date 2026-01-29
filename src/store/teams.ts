@@ -81,9 +81,10 @@ const TeamsStore: StateCreator<TeamsStore> = (set) => ({
       await api.delTeams(teamId);
 
       set((state) => {
+        const tempTeams = state.teams.filter((team) => team._id !== teamId);
         return {
-          teams: state.teams.filter((team) => team._id !== teamId,),
-          curTeam: state.curTeam?._id === teamId ? state.teams[0] : state.curTeam,
+          teams: tempTeams,
+          curTeam: state.curTeam?._id === teamId ? tempTeams[0] : state.curTeam,
         };
       });
     } finally {
