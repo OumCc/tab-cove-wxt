@@ -8,7 +8,7 @@ import { Button } from '@mantine/core';
 import Empty from '~/components/Empty';
 
 import { useGlobalStore, } from '~/store/global';
-import { useUserStore, } from '~/store/users';
+import { useUserStore, } from '@/store/teams';
 
 import styles from './index.module.less';
 

@@ -8,7 +8,7 @@ import { Stack, ActionIcon, Avatar, } from '@mantine/core';
 import { IconPlus } from '@tabler/icons-react';
 
 import { useGlobalStore, } from '~/store/global';
-import { useUserStore, } from '~/store/users';
+import { useUserStore, } from '@/store/teams';
 
 import styles from './index.module.less';
 

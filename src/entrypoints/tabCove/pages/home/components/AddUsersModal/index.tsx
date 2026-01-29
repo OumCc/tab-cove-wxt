@@ -9,7 +9,7 @@ import { notifications } from '@mantine/notifications';
 import { IconExclamationCircle } from '@tabler/icons-react';
 
 import { useGlobalStore, } from '~/store/global';
-import { useUserStore, } from '~/store/users';
+import { useUserStore, } from '@/store/teams';
 
 export default () => {
   const openAddUsersModal = useGlobalStore(state => state.openAddUsersModal);

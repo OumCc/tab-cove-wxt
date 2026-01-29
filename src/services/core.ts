@@ -1,22 +1,22 @@
-import type { User, Space, SpaceMembership, Resource, } from '~/types/core';
+import type { Team, Space, SpaceMembership, Resource, } from '~/types/core';
 
-import { usersStorage, } from '~/utils/storage';
+import { teamsStorage, } from '~/utils/storage';
 
-export const getUsers = async (): Promise<User[]> => {
-  return await usersStorage.getValue();
+export const getTeams = async (): Promise<Team[]> => {
+  return await teamsStorage.getValue();
 };
 
-export const addUsers = async (user: User): Promise<void> => {
-  const users = await getUsers();
-  users.push(user);
-  await usersStorage.setValue(users);
+export const addTeams = async (team: Team): Promise<void> => {
+  const teams = await getTeams();
+  teams.push(team);
+  await teamsStorage.setValue(teams);
 };
 
-export const delUsers = async (userId: string): Promise<void> => {
-  const users = await getUsers();
-  const index = users.findIndex((user) => user._id === userId);
+export const delTeams = async (teamId: string): Promise<void> => {
+  const teams = await getTeams();
+  const index = teams.findIndex((team) => team._id === teamId);
   if (index !== -1) {
-    users.splice(index, 1);
-    await usersStorage.setValue(users);
+    teams.splice(index, 1);
+    await teamsStorage.setValue(teams);
   }
 };

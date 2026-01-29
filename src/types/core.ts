@@ -1,6 +1,6 @@
 import { TabInfo } from '~/entrypoints/background/modules/windowCatalog/types';
 
-export interface User {
+export interface Team {
   _id: string;
   name: string;
   avatar?: string;
@@ -13,7 +13,7 @@ export interface Space {
 
 export interface SpaceMembership {
   _id: string;
-  userId: string;
+  teamId: string;
   spaceId: string;
   role: 'admin' | 'full';
 }

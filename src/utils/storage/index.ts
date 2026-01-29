@@ -1,9 +1,9 @@
 /*
  * @Description: 定义 @wxt-dev/storage 相关的存储项
  */
-import type { User, Space, SpaceMembership, Resource, } from '~/types/core';
+import type { Team, Space, SpaceMembership, Resource, } from '~/types/core';
 
-export const usersStorage = storage.defineItem<User[]>('local:users', {
+export const teamsStorage = storage.defineItem<Team[]>('local:teams', {
   fallback: [], // 当存储项不存在时返回空数组
   version: 1, // 版本号，便于后续数据迁移
 });
