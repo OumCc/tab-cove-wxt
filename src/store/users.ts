@@ -51,7 +51,11 @@ const usersStore: StateCreator<UsersStore> = (set) => ({
       set({ addUsersLoading: true, });
       await api.addUsers(user);
 
-      set((state) => ({ users: [...state.users, user,], }));
+      set((state) => {
+        return {
+          users: [...state.users, user,],
+        };
+      });
     } finally {
       set({ addUsersLoading: false, });
     }
