@@ -3,7 +3,7 @@
  */
 import { useEffect, } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { Button } from '@mantine/core';
+import { Button, Title, } from '@mantine/core';
 
 import Empty from '~/components/Empty';
 import Spaces from './Spaces';
@@ -20,15 +20,26 @@ export default () => {
   const {
     teams,
     curTeam,
+    delTeams,
   } = useTeamsStore(useShallow(state => ({
     teams: state.teams,
     curTeam: state.curTeam,
+    delTeams: state.delTeams,
   })));
 
   const renderPanel = () => {
     return (
       <div className={styles.panel}>
         <div className={styles.panel__left}>
+          <Title
+            order={3}
+            onClick={() => {
+              delTeams(curTeam!._id);
+            }}
+          >
+            { curTeam!.name }
+          </Title>
+
           <Spaces />
         </div>
 
@@ -55,7 +66,7 @@ export default () => {
   return (
     <div className={styles.box}>
       {
-        teams.length ? renderPanel() : renderEmpty()
+        !!curTeam ? renderPanel() : renderEmpty()
       }
     </div>
   );

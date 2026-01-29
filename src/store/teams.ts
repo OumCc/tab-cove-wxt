@@ -38,7 +38,19 @@ const TeamsStore: StateCreator<TeamsStore> = (set) => ({
       set({ getTeamsLoading: true, });
       const res = await api.getTeams();
 
-      set({ teams: res });
+      set((state) => {
+        const temp: any = {
+          teams: res,
+        };
+        const tempCurTeam = state.curTeam;
+
+        if (!tempCurTeam && res.length) {
+          temp.curTeam = res[0];
+        }
+
+        return temp;
+      });
+
       return res;
     } finally {
       set({ getTeamsLoading: false, });
@@ -54,6 +66,7 @@ const TeamsStore: StateCreator<TeamsStore> = (set) => ({
       set((state) => {
         return {
           teams: [...state.teams, team,],
+          curTeam: team,
         };
       });
     } finally {
@@ -67,7 +80,12 @@ const TeamsStore: StateCreator<TeamsStore> = (set) => ({
       set({ delTeamsLoading: true, });
       await api.delTeams(teamId);
 
-      set((state) => ({ teams: state.teams.filter((team) => team._id !== teamId,), }));
+      set((state) => {
+        return {
+          teams: state.teams.filter((team) => team._id !== teamId,),
+          curTeam: state.curTeam?._id === teamId ? state.teams[0] : state.curTeam,
+        };
+      });
     } finally {
       set({ delTeamsLoading: false, });
     }

@@ -34,7 +34,7 @@ export default () => {
   useEffect(() => {
     getTeams();
   }, []);
-
+  
   return (
     <Stack
       align="center"
@@ -49,6 +49,9 @@ export default () => {
             color="initials"
             radius="xl"
             name={team.name || ''}
+            onClick={() => {
+              setCurTeam(team);
+            }}
           />
         ))
       }
