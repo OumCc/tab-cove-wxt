@@ -4,7 +4,7 @@
  */
 import { useEffect, } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { Stack, ActionIcon, Avatar, } from '@mantine/core';
+import { Stack, ActionIcon, Avatar, Tooltip, } from '@mantine/core';
 import { IconPlus } from '@tabler/icons-react';
 
 import { useGlobalStore, } from '~/store/global';
@@ -53,18 +53,20 @@ export default () => {
         ))
       }
 
-      <ActionIcon
-        variant="subtle"
-        size={38}
-        radius="xl"
-        aria-label="Add Team"
-        loading={addTeamsLoading}
-        onClick={() => {
-          setOpenAddTeamsModal(true);
-        }}
-      >
-        <IconPlus />
-      </ActionIcon>
+      <Tooltip label="新增团队" withArrow position="right">
+        <ActionIcon
+          variant="subtle"
+          size={38}
+          radius="xl"
+          aria-label="新增团队"
+          loading={addTeamsLoading}
+          onClick={() => {
+            setOpenAddTeamsModal(true);
+          }}
+        >
+          <IconPlus />
+        </ActionIcon>
+      </Tooltip>
     </Stack>
   );
 };
