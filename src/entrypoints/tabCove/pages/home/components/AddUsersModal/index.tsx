@@ -8,23 +8,30 @@ import { Stack, Modal, TextInput, Button, } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { IconExclamationCircle } from '@tabler/icons-react';
 
+import { useGlobalStore, } from '~/store/global';
 import { useUserStore, } from '~/store/users';
 
 export default () => {
+  const openAddUsersModal = useGlobalStore(state => state.openAddUsersModal);
   const addUsersLoading = useUserStore(state => state.addUsersLoading);
 
-  const {
-    addUsers,
-  } = useUserStore(useShallow(state => ({
+  const { setOpenAddUsersModal,} = useGlobalStore(useShallow(state => ({
+    setOpenAddUsersModal: state.setOpenAddUsersModal,
+  })));
+  const { addUsers,} = useUserStore(useShallow(state => ({
     addUsers: state.addUsers,
   })));
 
   const [userName, setUserName] = useState('');
 
+  const handleClose = () => {
+    setOpenAddUsersModal(false);
+  }
+
   return (
     <Modal
-      opened={opened}
-      onClose={close}
+      opened={openAddUsersModal}
+      onClose={handleClose}
       title="新增用户"
     >
       <Stack gap="lg">
@@ -51,7 +58,7 @@ export default () => {
               _id: nanoid(),
               name: userName,
             });
-            close();
+            handleClose();
           }}
         >
           提交
