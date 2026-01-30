@@ -3,6 +3,8 @@ import { Notifications } from '@mantine/notifications';
 
 import Home from './pages/home';
 
+import CreateAccountModal from './components/CreateAccountModal';
+
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
 
@@ -11,6 +13,8 @@ export default function App() {
     <MantineProvider>
       <Notifications limit={3} />
       <Home />
+
+      <CreateAccountModal />
     </MantineProvider>
   );
 }
