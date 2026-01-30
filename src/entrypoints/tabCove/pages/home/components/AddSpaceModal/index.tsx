@@ -12,11 +12,11 @@ import { useGlobalStore, } from '~/store/global';
 import { useTeamsStore, } from '~/store/teams';
 
 export default () => {
-  const openAddTeamsModal = useGlobalStore(state => state.openAddTeamsModal);
+  const openAddSpacesModal = useGlobalStore(state => state.openAddSpacesModal);
   const addTeamLoading = useTeamsStore(state => state.addTeamLoading);
 
-  const { setOpenAddTeamsModal,} = useGlobalStore(useShallow(state => ({
-    setOpenAddTeamsModal: state.setOpenAddTeamsModal,
+  const { setOpenAddSpacesModal,} = useGlobalStore(useShallow(state => ({
+    setOpenAddSpacesModal: state.setOpenAddSpacesModal,
   })));
   const { addTeam,} = useTeamsStore(useShallow(state => ({
     addTeam: state.addTeam,
@@ -25,12 +25,12 @@ export default () => {
   const [teamName, setTeamName] = useState('');
 
   const handleClose = () => {
-    setOpenAddTeamsModal(false);
+    setOpenAddSpacesModal(false);
   };
 
   return (
     <Modal
-      opened={openAddTeamsModal}
+      opened={openAddSpacesModal}
       onClose={handleClose}
       title="新增空间"
     >

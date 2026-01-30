@@ -5,22 +5,30 @@ import { create, type StateCreator } from 'zustand';
 import { devtools, } from 'zustand/middleware';
 
 interface GlobalStore {
+  openCreateAccountModal: boolean;
+  setOpenCreateAccountModal: (openCreateAccountModal: boolean) => void;
+
   openAddTeamsModal: boolean;
   setOpenAddTeamsModal: (openAddTeamsModal: boolean) => void;
 
-  openCreateAccountModal: boolean;
-  setOpenCreateAccountModal: (openCreateAccountModal: boolean) => void;
+  openAddSpacesModal: boolean;
+  setOpenAddSpacesModal: (openAddSpacesModal: boolean) => void;
 };
 
 const globalStore: StateCreator<GlobalStore> = (set) => ({
+  openCreateAccountModal: false,
+  setOpenCreateAccountModal: (openCreateAccountModal) => {
+    set({ openCreateAccountModal });
+  },
+
   openAddTeamsModal: false,
   setOpenAddTeamsModal: (openAddTeamsModal) => {
     set({ openAddTeamsModal });
   },
 
-  openCreateAccountModal: false,
-  setOpenCreateAccountModal: (openCreateAccountModal) => {
-    set({ openCreateAccountModal });
+  openAddSpacesModal: false,
+  setOpenAddSpacesModal: (openAddSpacesModal) => {
+    set({ openAddSpacesModal });
   },
 });
 
