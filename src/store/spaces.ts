@@ -5,47 +5,47 @@
 import { create, type StateCreator } from 'zustand';
 import { devtools, } from 'zustand/middleware';
 
-import type { Team } from '~/types/core';
+import type { Space } from '~/types/core';
 import * as api from '~/services/core';
 
-interface TeamsStore {
-  teams: Team[];
-  curTeam: Team | undefined;
+interface SpacesStore {
+  spaces: Space[];
+  curSpace: Space | undefined;
 
-  setCurTeam: (team: Team) => void;
+  setCurSpace: (space: Space) => void;
 
-  getTeamsLoading: boolean;
-  getTeams: () => Promise<Team[]>;
+  getSpacesLoading: boolean;
+  getSpaces: () => Promise<Space[]>;
 
-  addTeamLoading: boolean;
-  addTeam: (team: Team) => Promise<void>;
+  addSpaceLoading: boolean;
+  addSpace: (space: Space) => Promise<void>;
 
-  delTeamLoading: boolean;
-  delTeam: (teamId: string) => Promise<void>;
+  delSpaceLoading: boolean;
+  delSpace: (teamId: string) => Promise<void>;
 };
 
-const teamsStore: StateCreator<TeamsStore> = (set) => ({
-  teams: [],
-  curTeam: undefined,
+const spacesStore: StateCreator<SpacesStore> = (set) => ({
+  spaces: [],
+  curSpace: undefined,
 
-  setCurTeam: (team: Team) => {
-    set({ curTeam: team, });
+  setCurSpace: (space: Space) => {
+    set({ curSpace: space, });
   },
 
-  getTeamsLoading: false,
-  getTeams: async () => {
+  getSpacesLoading: false,
+  getSpaces: async () => {
     try {
-      set({ getTeamsLoading: true, });
-      const res = await api.getTeams();
+      set({ getSpacesLoading: true, });
+      const res = await api.getSpaces();
 
       set((state) => {
         const temp: any = {
-          teams: res,
+          spaces: res,
         };
-        const tempCurTeam = state.curTeam;
+        const tempCurSpace = state.curSpace;
 
-        if (!tempCurTeam && res.length) {
-          temp.curTeam = res[0];
+        if (!tempCurSpace && res.length) {
+          temp.curSpace = res[0];
         }
 
         return temp;
@@ -53,49 +53,49 @@ const teamsStore: StateCreator<TeamsStore> = (set) => ({
 
       return res;
     } finally {
-      set({ getTeamsLoading: false, });
+      set({ getSpacesLoading: false, });
     }
   },
 
-  addTeamLoading: false,
-  addTeam: async (team: Team) => {
+  addSpaceLoading: false,
+  addSpace: async (space: Space) => {
     try {
-      set({ addTeamLoading: true, });
-      await api.addTeam(team);
+      set({ addSpaceLoading: true, });
+      await api.addSpace(space);
 
       set((state) => {
         return {
-          teams: [...state.teams, team,],
-          curTeam: team,
+          spaces: [...state.spaces, space,],
+          curSpace: space,
         };
       });
     } finally {
-      set({ addTeamLoading: false, });
+      set({ addSpaceLoading: false, });
     }
   },
 
-  delTeamLoading: false,
-  delTeam: async (teamId: string) => {
+  delSpaceLoading: false,
+  delSpace: async (teamId: string) => {
     try {
-      set({ delTeamLoading: true, });
-      await api.delTeam(teamId);
+      set({ delSpaceLoading: true, });
+      await api.delSpace(teamId);
 
       set((state) => {
-        const tempTeams = state.teams.filter((team) => team._id !== teamId);
+        const tempSpaces = state.spaces.filter((space) => space._id !== teamId);
         return {
-          teams: tempTeams,
-          curTeam: state.curTeam?._id === teamId ? tempTeams[0] : state.curTeam,
+          spaces: tempSpaces,
+          curSpace: state.curSpace?._id === teamId ? tempSpaces[0] : state.curSpace,
         };
       });
     } finally {
-      set({ delTeamLoading: false, });
+      set({ delSpaceLoading: false, });
     }
   },
 });
 
-export const useTeamsStore = create<TeamsStore>()(
-  devtools(teamsStore, {
-    name: 'tabCove_teams',
+export const useTeamsStore = create<SpacesStore>()(
+  devtools(spacesStore, {
+    name: 'tabCove_spaces',
     enabled: import.meta.env.DEV,
   })
 );
