@@ -26,7 +26,7 @@ export default () => {
 
   const handleClose = () => {
     setOpenCreateAccountModal(false);
-  }
+  };
 
   return (
     <Modal
@@ -56,6 +56,9 @@ export default () => {
                 name: accountName,
               });
               handleClose();
+              notifications.success({
+                message: '创建账号成功',
+              });
             }}
           >
             提交

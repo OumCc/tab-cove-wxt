@@ -26,7 +26,7 @@ export default () => {
 
   const handleClose = () => {
     setOpenAddTeamsModal(false);
-  }
+  };
 
   return (
     <Modal
@@ -56,6 +56,9 @@ export default () => {
                 name: teamName,
               });
               handleClose();
+              notifications.success({
+                message: '新增团队成功',
+              });
             }}
           >
             提交
