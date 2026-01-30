@@ -3,14 +3,14 @@
  *    展示当前浏览器打开的所有窗口，以及每个窗口包含的所有标签页
  */
 import { useEffect, useState, } from 'react';
-import { Accordion } from '@mantine/core';
+import { Accordion, ScrollArea, } from '@mantine/core';
 
 import { sendMessage, onMessage } from '~/types/messaging';
 import type { WindowInfo } from '~/entrypoints/background/modules/windowCatalog/types';
 
 import styles from './index.module.less';
 
-export default (props: any) => {
+export default () => {
   const [windowInfo, setWindowInfo] = useState<WindowInfo[]>([]);
   const [accordionValue, setAccordionValue] = useState<string[]>([]);
 
@@ -36,7 +36,7 @@ export default (props: any) => {
   };
 
   return (
-    <div>
+    <ScrollArea h="100%">
       <Accordion
         variant="separated"
         radius="lg"
@@ -58,6 +58,6 @@ export default (props: any) => {
           ))
         }
       </Accordion>
-    </div>
+    </ScrollArea>
   );
 };
