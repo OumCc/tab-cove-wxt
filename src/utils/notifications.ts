@@ -15,7 +15,7 @@ import {
 const DEFAULT_POSITION: NotificationData['position'] = 'top-right';
 
 function showWithDefaults(
-  defaults: Partial<Pick<NotificationData, 'position' | 'icon' | 'color'>>,
+  defaults: Partial<Pick<NotificationData, 'position' | 'icon' | 'color' | 'withBorder'>>,
   options: Partial<NotificationData>
 ): string {
   return mantineNotifications.show({ ...defaults, ...options } as NotificationData);
@@ -33,6 +33,7 @@ export const notifications = {
         position: DEFAULT_POSITION,
         icon: React.createElement(IconCheck),
         color: '#12b886',
+        withBorder: true,
       },
       options
     );
@@ -43,6 +44,7 @@ export const notifications = {
         position: DEFAULT_POSITION,
         icon: React.createElement(IconX),
         color: '#fa5252',
+        withBorder: true,
       },
       options
     );
@@ -53,6 +55,7 @@ export const notifications = {
         position: DEFAULT_POSITION,
         icon: React.createElement(IconInfoSmall),
         color: '#228be6',
+        withBorder: true,
       },
       options
     );
@@ -63,6 +66,7 @@ export const notifications = {
         position: DEFAULT_POSITION,
         icon: React.createElement(IconExclamationMark),
         color: '#faad14',
+        withBorder: true,
       },
       options
     );

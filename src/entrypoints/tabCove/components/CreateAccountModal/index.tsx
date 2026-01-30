@@ -30,9 +30,12 @@ export default () => {
 
   return (
     <Modal
+      title="创建账号"
       opened={openCreateAccountModal}
       onClose={handleClose}
-      title="创建账号"
+      withCloseButton={false}
+      closeOnClickOutside={false}
+      closeOnEscape={false}
     >
       <Box pos="relative">
         <Stack gap="lg">
