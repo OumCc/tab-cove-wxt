@@ -8,7 +8,7 @@ import React from 'react';
 import {
   IconCheck,
   IconExclamationMark,
-  IconInfoCircle,
+  IconInfoSmall,
   IconX,
 } from '@tabler/icons-react';
 
@@ -32,7 +32,7 @@ export const notifications = {
       {
         position: DEFAULT_POSITION,
         icon: React.createElement(IconCheck),
-        color: 'teal',
+        color: '#12b886',
       },
       options
     );
@@ -42,7 +42,7 @@ export const notifications = {
       {
         position: DEFAULT_POSITION,
         icon: React.createElement(IconX),
-        color: 'red',
+        color: '#fa5252',
       },
       options
     );
@@ -51,8 +51,8 @@ export const notifications = {
     return showWithDefaults(
       {
         position: DEFAULT_POSITION,
-        icon: React.createElement(IconInfoCircle),
-        color: 'blue',
+        icon: React.createElement(IconInfoSmall),
+        color: '#228be6',
       },
       options
     );

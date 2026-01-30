@@ -5,8 +5,8 @@ import { useState, } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { nanoid } from 'nanoid';
 import { Stack, Modal, TextInput, Button, LoadingOverlay, Box, } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
-import { IconExclamationMark } from '@tabler/icons-react';
+
+import { notifications } from '~/utils/notifications';
 
 import { useGlobalStore, } from '~/store/global';
 import { useUserStore, } from '@/store/user';
@@ -45,12 +45,9 @@ export default () => {
           <Button
             onClick={async () => {
               if (!accountName) {
-                notifications.show({
+                notifications.warning({
                   message: '请输入账号名称',
-                  position: 'top-right',
-                  icon: <IconExclamationMark />,
-                  color: '#faad14'
-                })
+                });
                 return;
               }
 
