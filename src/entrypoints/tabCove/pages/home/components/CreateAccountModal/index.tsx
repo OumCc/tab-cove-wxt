@@ -9,17 +9,17 @@ import { notifications } from '@mantine/notifications';
 import { IconExclamationMark } from '@tabler/icons-react';
 
 import { useGlobalStore, } from '~/store/global';
-import { useTeamsStore, } from '@/store/teams';
+import { useUserStore, } from '@/store/user';
 
 export default () => {
   const openCreateAccountModal = useGlobalStore(state => state.openCreateAccountModal);
-  const addTeamsLoading = useTeamsStore(state => state.addTeamsLoading);
+  const createUserLoading = useUserStore(state => state.createUserLoading);
 
   const { setOpenCreateAccountModal,} = useGlobalStore(useShallow(state => ({
     setOpenCreateAccountModal: state.setOpenCreateAccountModal,
   })));
-  const { addTeams,} = useTeamsStore(useShallow(state => ({
-    addTeams: state.addTeams,
+  const { createUser,} = useUserStore(useShallow(state => ({
+    createUser: state.createUser,
   })));
 
   const [accountName, setAccountName] = useState('');
@@ -42,7 +42,7 @@ export default () => {
           onChange={(event) => setAccountName(event.target.value)}
         />
         <Button
-          loading={addTeamsLoading}
+          loading={createUserLoading}
           onClick={async () => {
             if (!accountName) {
               notifications.show({
@@ -54,7 +54,7 @@ export default () => {
               return;
             }
 
-            await addTeams({
+            await createUser({
               _id: nanoid(),
               name: accountName,
             });
