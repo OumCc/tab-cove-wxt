@@ -9,7 +9,7 @@ import Empty from '~/components/Empty';
 import Spaces from './Spaces';
 
 import { useGlobalStore, } from '~/store/global';
-import { useTeamsStore, } from '@/store/teams';
+import { useTeamsStore, } from '~/store/teams';
 
 import styles from './index.module.less';
 

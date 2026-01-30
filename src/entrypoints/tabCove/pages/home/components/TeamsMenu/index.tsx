@@ -8,12 +8,11 @@ import { Stack, ActionIcon, Avatar, Tooltip, } from '@mantine/core';
 import { IconPlus } from '@tabler/icons-react';
 
 import { useGlobalStore, } from '~/store/global';
-import { useTeamsStore, } from '@/store/teams';
+import { useTeamsStore, } from '~/store/teams';
 
 import styles from './index.module.less';
 
 export default () => {
-  const getTeamsLoading = useTeamsStore(state => state.getTeamsLoading);
   const addTeamsLoading = useTeamsStore(state => state.addTeamsLoading);
 
   const { setOpenAddTeamsModal,} = useGlobalStore(useShallow(state => ({

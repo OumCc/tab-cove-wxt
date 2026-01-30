@@ -9,7 +9,7 @@ import { Stack, Modal, TextInput, Button, LoadingOverlay, Box, } from '@mantine/
 import { notifications } from '~/utils/notifications';
 
 import { useGlobalStore, } from '~/store/global';
-import { useUserStore, } from '@/store/user';
+import { useUserStore, } from '~/store/user';
 
 export default () => {
   const openCreateAccountModal = useGlobalStore(state => state.openCreateAccountModal);

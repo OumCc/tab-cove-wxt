@@ -238,11 +238,11 @@ browser.runtime.onMessage.addListener(
 
 ### 2. 资源导入
 
-使用 `@/` 别名导入项目文件：
+使用 `~/` 别名导入项目文件：
 
 ```typescript
-import logo from '@/assets/logo.png';
-import { utils } from '@/utils/helper';
+import logo from '~/assets/logo.png';
+import { utils } from '~/utils/helper';
 ```
 
 ### 3. Content Script 隔离

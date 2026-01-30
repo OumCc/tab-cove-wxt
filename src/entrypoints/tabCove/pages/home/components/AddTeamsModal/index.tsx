@@ -9,7 +9,7 @@ import { Stack, Modal, TextInput, Button, LoadingOverlay, Box, } from '@mantine/
 import { notifications } from '~/utils/notifications';
 
 import { useGlobalStore, } from '~/store/global';
-import { useTeamsStore, } from '@/store/teams';
+import { useTeamsStore, } from '~/store/teams';
 
 export default () => {
   const openAddTeamsModal = useGlobalStore(state => state.openAddTeamsModal);
