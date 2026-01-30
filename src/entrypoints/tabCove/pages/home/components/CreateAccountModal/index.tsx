@@ -4,7 +4,7 @@
 import { useState, } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { nanoid } from 'nanoid';
-import { Stack, Modal, TextInput, Button, } from '@mantine/core';
+import { Stack, Modal, TextInput, Button, LoadingOverlay, Box, } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { IconExclamationMark } from '@tabler/icons-react';
 
@@ -34,36 +34,39 @@ export default () => {
       onClose={handleClose}
       title="创建账号"
     >
-      <Stack gap="lg">
-        <TextInput
-          label="账号名称"
-          placeholder="请输入账号名称"
-          value={accountName}
-          onChange={(event) => setAccountName(event.target.value)}
-        />
-        <Button
-          loading={createUserLoading}
-          onClick={async () => {
-            if (!accountName) {
-              notifications.show({
-                message: '请输入账号名称',
-                position: 'top-right',
-                icon: <IconExclamationMark />,
-                color: '#faad14'
-              })
-              return;
-            }
+      <Box pos="relative">
+        <Stack gap="lg">
+          <TextInput
+            label="账号名称"
+            placeholder="请输入账号名称"
+            value={accountName}
+            onChange={(event) => setAccountName(event.target.value)}
+          />
+          <Button
+            onClick={async () => {
+              if (!accountName) {
+                notifications.show({
+                  message: '请输入账号名称',
+                  position: 'top-right',
+                  icon: <IconExclamationMark />,
+                  color: '#faad14'
+                })
+                return;
+              }
 
-            await createUser({
-              _id: nanoid(),
-              name: accountName,
-            });
-            handleClose();
-          }}
-        >
-          提交
-        </Button>
-      </Stack>
+              await createUser({
+                _id: nanoid(),
+                name: accountName,
+              });
+              handleClose();
+            }}
+          >
+            提交
+          </Button>
+        </Stack>
+
+        <LoadingOverlay visible={createUserLoading} overlayProps={{ blur: 2 }} />
+      </Box>
     </Modal>
   );
 };

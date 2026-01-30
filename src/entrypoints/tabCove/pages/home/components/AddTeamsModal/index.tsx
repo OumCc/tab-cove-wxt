@@ -4,7 +4,7 @@
 import { useState, } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { nanoid } from 'nanoid';
-import { Stack, Modal, TextInput, Button, } from '@mantine/core';
+import { Stack, Modal, TextInput, Button, LoadingOverlay, Box, } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { IconExclamationMark } from '@tabler/icons-react';
 
@@ -34,36 +34,39 @@ export default () => {
       onClose={handleClose}
       title="新增团队"
     >
-      <Stack gap="lg">
-        <TextInput
-          label="团队名"
-          placeholder="请输入团队名"
-          value={teamName}
-          onChange={(event) => setTeamName(event.target.value)}
-        />
-        <Button
-          loading={addTeamsLoading}
-          onClick={async () => {
-            if (!teamName) {
-              notifications.show({
-                message: '请输入团队名',
-                position: 'top-right',
-                icon: <IconExclamationMark />,
-                color: '#faad14'
-              })
-              return;
-            }
+      <Box pos="relative">
+        <Stack gap="lg">
+          <TextInput
+            label="团队名"
+            placeholder="请输入团队名"
+            value={teamName}
+            onChange={(event) => setTeamName(event.target.value)}
+          />
+          <Button
+            onClick={async () => {
+              if (!teamName) {
+                notifications.show({
+                  message: '请输入团队名',
+                  position: 'top-right',
+                  icon: <IconExclamationMark />,
+                  color: '#faad14'
+                })
+                return;
+              }
 
-            await addTeams({
-              _id: nanoid(),
-              name: teamName,
-            });
-            handleClose();
-          }}
-        >
-          提交
-        </Button>
-      </Stack>
+              await addTeams({
+                _id: nanoid(),
+                name: teamName,
+              });
+              handleClose();
+            }}
+          >
+            提交
+          </Button>
+        </Stack>
+
+        <LoadingOverlay visible={addTeamsLoading} overlayProps={{ blur: 2 }} />
+      </Box>
     </Modal>
   );
 };
