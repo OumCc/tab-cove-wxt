@@ -2,6 +2,7 @@
 import TeamsMenu from './components/TeamsMenu';
 import AddTeamModal from './components/AddTeamModal';
 import AddSpaceModal from './components/AddSpaceModal';
+import AddCabinetModal from './components/AddCabinetModal';
 import Workbench from './components/Workbench';
 import WindowCatalog from './components/WindowCatalog';
 
@@ -26,6 +27,7 @@ export default () => {
 
       <AddTeamModal />
       <AddSpaceModal />
+      <AddCabinetModal />
     </>
   );
 }

@@ -13,6 +13,9 @@ interface GlobalStore {
 
   openAddSpacesModal: boolean;
   setOpenAddSpacesModal: (openAddSpacesModal: boolean) => void;
+
+  openAddCabinetModal: boolean;
+  setOpenAddCabinetModal: (openAddCabinetModal: boolean) => void;
 };
 
 const globalStore: StateCreator<GlobalStore> = (set) => ({
@@ -29,6 +32,11 @@ const globalStore: StateCreator<GlobalStore> = (set) => ({
   openAddSpacesModal: false,
   setOpenAddSpacesModal: (openAddSpacesModal) => {
     set({ openAddSpacesModal });
+  },
+
+  openAddCabinetModal: false,
+  setOpenAddCabinetModal: (openAddCabinetModal) => {
+    set({ openAddCabinetModal });
   },
 });
 
