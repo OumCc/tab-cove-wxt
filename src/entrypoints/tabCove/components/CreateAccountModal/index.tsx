@@ -48,9 +48,7 @@ export default () => {
           <Button
             onClick={async () => {
               if (!accountName) {
-                notifications.warning({
-                  message: '请输入账号名称',
-                });
+                notifications.warning({ message: '请输入账号名称' });
                 return;
               }
 
@@ -59,9 +57,7 @@ export default () => {
                 name: accountName,
               });
               handleClose();
-              notifications.success({
-                message: '创建账号成功',
-              });
+              notifications.success({ message: '创建账号成功' });
             }}
           >
             提交

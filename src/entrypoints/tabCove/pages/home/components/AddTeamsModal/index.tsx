@@ -45,9 +45,7 @@ export default () => {
           <Button
             onClick={async () => {
               if (!teamName) {
-                notifications.warning({
-                  message: '请输入团队名',
-                });
+                notifications.warning({ message: '请输入团队名' });
                 return;
               }
 
@@ -56,9 +54,7 @@ export default () => {
                 name: teamName,
               });
               handleClose();
-              notifications.success({
-                message: '新增团队成功',
-              });
+              notifications.success({ message: '新增团队成功' });
             }}
           >
             提交
