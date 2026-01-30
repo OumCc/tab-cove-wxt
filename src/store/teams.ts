@@ -24,7 +24,7 @@ interface TeamsStore {
   delTeams: (teamId: string) => Promise<void>;
 };
 
-const TeamsStore: StateCreator<TeamsStore> = (set) => ({
+const teamsStore: StateCreator<TeamsStore> = (set) => ({
   teams: [],
   curTeam: undefined,
 
@@ -94,7 +94,7 @@ const TeamsStore: StateCreator<TeamsStore> = (set) => ({
 });
 
 export const useTeamsStore = create<TeamsStore>()(
-  devtools(TeamsStore, {
+  devtools(teamsStore, {
     name: 'tabCove_teams',
     enabled: import.meta.env.DEV,
   })

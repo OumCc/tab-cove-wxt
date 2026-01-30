@@ -3,8 +3,8 @@
  */
 import type { User, Team, TeamMembership, Space, SpacePermission, Resource, } from '~/types/core';
 
-export const usersStorage = storage.defineItem<User[]>('local:users', {
-  fallback: [], // 当存储项不存在时返回空数组
+export const userStorage = storage.defineItem<User | null>('local:user', {
+  fallback: null, // 当存储项不存在时返回空
   version: 1, // 版本号，便于后续数据迁移
 });
 

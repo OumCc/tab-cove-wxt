@@ -1,6 +1,14 @@
-import type { Team, Space, SpaceMembership, Resource, } from '~/types/core';
+import type { User, Team, TeamMembership, Space, SpacePermission, Resource, } from '~/types/core';
 
-import { teamsStorage, } from '~/utils/storage';
+import { userStorage, teamsStorage, teamMembershipsStorage, spacesStorage, spaceMembershipsStorage, resourcesStorage, } from '~/utils/storage';
+
+export const getUser = async (): Promise<User | null> => {
+  return await userStorage.getValue();
+};
+
+export const createUser = async (user: User): Promise<void> => {
+  await userStorage.setValue(user);
+};
 
 export const getTeams = async (): Promise<Team[]> => {
   return await teamsStorage.getValue();
