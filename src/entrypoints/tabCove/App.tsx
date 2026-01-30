@@ -1,6 +1,6 @@
 import { useEffect, } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { MantineProvider } from '@mantine/core';
+import { MantineProvider, LoadingOverlay, } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 
 import Home from './pages/home';
@@ -17,6 +17,7 @@ export default function App() {
   const { setOpenCreateAccountModal,} = useGlobalStore(useShallow(state => ({
     setOpenCreateAccountModal: state.setOpenCreateAccountModal,
   })));
+  const getUserLoading = useUserStore(state => state.getUserLoading);
   const { getUser,} = useUserStore(useShallow(state => ({
     getUser: state.getUser,
   })));
@@ -38,6 +39,19 @@ export default function App() {
       <Home />
 
       <CreateAccountModal />
+
+      {/* 全屏 loading */}
+      <LoadingOverlay
+        visible={getUserLoading}
+        loaderProps={{
+          size: 'lg'
+        }}
+        overlayProps={{
+          fixed: true,
+          backgroundOpacity: 1,
+          zIndex: 'var(--mantine-z-index-max)',
+        }}
+      />
     </MantineProvider>
   );
 }
