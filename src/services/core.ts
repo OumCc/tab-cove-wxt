@@ -47,3 +47,22 @@ export const delTeam = async (teamId: string): Promise<void> => {
     await teamsStorage.setValue(teams);
   }
 };
+
+export const getSpaces = async (): Promise<Space[]> => {
+  return await spacesStorage.getValue();
+};
+
+export const addSpace = async (space: Space): Promise<void> => {
+  const spaces = await getSpaces();
+  spaces.push(space);
+  await spacesStorage.setValue(spaces);
+};
+
+export const delSpace = async (spaceId: string): Promise<void> => {
+  const spaces = await getSpaces();
+  const index = spaces.findIndex((space) => space._id === spaceId);
+  if (index !== -1) {
+    spaces.splice(index, 1);
+    await spacesStorage.setValue(spaces);
+  }
+};
