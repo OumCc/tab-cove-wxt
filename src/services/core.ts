@@ -1,3 +1,5 @@
+import { nanoid } from 'nanoid';
+
 import type { User, Team, TeamMembership, Space, SpacePermission, Resource, } from '~/types/core';
 
 import { userStorage, teamsStorage, teamMembershipsStorage, spacesStorage, spaceMembershipsStorage, resourcesStorage, } from '~/utils/storage';
@@ -15,6 +17,23 @@ export const getTeams = async (): Promise<Team[]> => {
 };
 
 export const addTeams = async (team: Team): Promise<void> => {
+  const user = await getUser();
+
+  if (!user?._id) {
+    throw new Error('用户不存在');
+  }
+
+  const teamMemberships = await teamMembershipsStorage.getValue();
+
+  teamMemberships.push({
+    _id: nanoid(),
+    teamId: team._id,
+    userId: user._id,
+    role: 'owner',
+  });
+
+  await teamMembershipsStorage.setValue(teamMemberships);
+
   const teams = await getTeams();
   teams.push(team);
   await teamsStorage.setValue(teams);

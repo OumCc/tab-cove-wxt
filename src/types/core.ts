@@ -6,7 +6,6 @@ export interface User {
   avatar?: string;
 }
 
-
 export interface Team {
   _id: string;
   name: string;
