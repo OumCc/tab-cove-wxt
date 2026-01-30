@@ -1,12 +1,12 @@
 /*
  * @Description: 核心工作台
  */
-import { useEffect, } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { Button, Title, } from '@mantine/core';
 
 import Empty from '~/components/Empty';
 import Spaces from './Spaces';
+import Cabinet from './Cabinet';
 
 import { useGlobalStore, } from '~/store/global';
 import { useTeamsStore, } from '~/store/teams';
@@ -18,7 +18,6 @@ export default () => {
     setOpenAddTeamsModal: state.setOpenAddTeamsModal,
   })));
   const {
-    teams,
     curTeam,
     delTeam,
   } = useTeamsStore(useShallow(state => ({
@@ -44,6 +43,7 @@ export default () => {
         </div>
 
         <div className={styles.panel__right}>
+          <Cabinet />
         </div>
       </div>
     );

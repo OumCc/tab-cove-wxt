@@ -33,7 +33,7 @@ export interface SpacePermission {
   userId: string; // 被授权的用户
 }
 
-export interface Resource {
+export interface Cabinet {
   _id: string;
   name: string;
   spaceId: string;
