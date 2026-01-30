@@ -22,7 +22,7 @@ export default () => {
     addTeam: state.addTeam,
   })));
 
-  const [teamName, setTeamName] = useState('');
+  const [cabinetName, setCabinetName] = useState('');
 
   const handleClose = () => {
     setOpenAddCabinetModal(false);
@@ -39,19 +39,19 @@ export default () => {
           <TextInput
             label="存储柜名"
             placeholder="请输入存储柜名"
-            value={teamName}
-            onChange={(event) => setTeamName(event.target.value)}
+            value={cabinetName}
+            onChange={(event) => setCabinetName(event.target.value)}
           />
           <Button
             onClick={async () => {
-              if (!teamName) {
+              if (!cabinetName) {
                 notifications.warning({ message: '请输入存储柜名' });
                 return;
               }
 
               await addTeam({
                 _id: nanoid(),
-                name: teamName,
+                name: cabinetName,
               });
               handleClose();
               notifications.success({ message: '新增存储柜成功' });
