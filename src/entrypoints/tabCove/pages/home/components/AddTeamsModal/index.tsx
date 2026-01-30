@@ -13,13 +13,13 @@ import { useTeamsStore, } from '~/store/teams';
 
 export default () => {
   const openAddTeamsModal = useGlobalStore(state => state.openAddTeamsModal);
-  const addTeamsLoading = useTeamsStore(state => state.addTeamsLoading);
+  const addTeamLoading = useTeamsStore(state => state.addTeamLoading);
 
   const { setOpenAddTeamsModal,} = useGlobalStore(useShallow(state => ({
     setOpenAddTeamsModal: state.setOpenAddTeamsModal,
   })));
-  const { addTeams,} = useTeamsStore(useShallow(state => ({
-    addTeams: state.addTeams,
+  const { addTeam,} = useTeamsStore(useShallow(state => ({
+    addTeam: state.addTeam,
   })));
 
   const [teamName, setTeamName] = useState('');
@@ -49,7 +49,7 @@ export default () => {
                 return;
               }
 
-              await addTeams({
+              await addTeam({
                 _id: nanoid(),
                 name: teamName,
               });
@@ -61,7 +61,7 @@ export default () => {
           </Button>
         </Stack>
 
-        <LoadingOverlay visible={addTeamsLoading} overlayProps={{ blur: 2 }} />
+        <LoadingOverlay visible={addTeamLoading} overlayProps={{ blur: 2 }} />
       </Box>
     </Modal>
   );

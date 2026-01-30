@@ -17,11 +17,11 @@ interface TeamsStore {
   getTeamsLoading: boolean;
   getTeams: () => Promise<Team[]>;
 
-  addTeamsLoading: boolean;
-  addTeams: (team: Team) => Promise<void>;
+  addTeamLoading: boolean;
+  addTeam: (team: Team) => Promise<void>;
 
-  delTeamsLoading: boolean;
-  delTeams: (teamId: string) => Promise<void>;
+  delTeamLoading: boolean;
+  delTeam: (teamId: string) => Promise<void>;
 };
 
 const teamsStore: StateCreator<TeamsStore> = (set) => ({
@@ -57,11 +57,11 @@ const teamsStore: StateCreator<TeamsStore> = (set) => ({
     }
   },
 
-  addTeamsLoading: false,
-  addTeams: async (team: Team) => {
+  addTeamLoading: false,
+  addTeam: async (team: Team) => {
     try {
-      set({ addTeamsLoading: true, });
-      await api.addTeams(team);
+      set({ addTeamLoading: true, });
+      await api.addTeam(team);
 
       set((state) => {
         return {
@@ -70,15 +70,15 @@ const teamsStore: StateCreator<TeamsStore> = (set) => ({
         };
       });
     } finally {
-      set({ addTeamsLoading: false, });
+      set({ addTeamLoading: false, });
     }
   },
 
-  delTeamsLoading: false,
-  delTeams: async (teamId: string) => {
+  delTeamLoading: false,
+  delTeam: async (teamId: string) => {
     try {
-      set({ delTeamsLoading: true, });
-      await api.delTeams(teamId);
+      set({ delTeamLoading: true, });
+      await api.delTeam(teamId);
 
       set((state) => {
         const tempTeams = state.teams.filter((team) => team._id !== teamId);
@@ -88,7 +88,7 @@ const teamsStore: StateCreator<TeamsStore> = (set) => ({
         };
       });
     } finally {
-      set({ delTeamsLoading: false, });
+      set({ delTeamLoading: false, });
     }
   },
 });

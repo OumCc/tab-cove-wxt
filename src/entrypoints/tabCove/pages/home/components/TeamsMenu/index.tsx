@@ -13,7 +13,7 @@ import { useTeamsStore, } from '~/store/teams';
 import styles from './index.module.less';
 
 export default () => {
-  const addTeamsLoading = useTeamsStore(state => state.addTeamsLoading);
+  const addTeamLoading = useTeamsStore(state => state.addTeamLoading);
 
   const { setOpenAddTeamsModal,} = useGlobalStore(useShallow(state => ({
     setOpenAddTeamsModal: state.setOpenAddTeamsModal,
@@ -61,7 +61,7 @@ export default () => {
           size={38}
           radius="xl"
           aria-label="新增团队"
-          loading={addTeamsLoading}
+          loading={addTeamLoading}
           onClick={() => {
             setOpenAddTeamsModal(true);
           }}

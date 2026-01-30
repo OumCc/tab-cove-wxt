@@ -20,11 +20,11 @@ export default () => {
   const {
     teams,
     curTeam,
-    delTeams,
+    delTeam,
   } = useTeamsStore(useShallow(state => ({
     teams: state.teams,
     curTeam: state.curTeam,
-    delTeams: state.delTeams,
+    delTeam: state.delTeam,
   })));
 
   const renderPanel = () => {
@@ -34,7 +34,7 @@ export default () => {
           <Title
             order={3}
             onClick={() => {
-              delTeams(curTeam!._id);
+              delTeam(curTeam!._id);
             }}
           >
             { curTeam!.name }

@@ -16,7 +16,7 @@ export const getTeams = async (): Promise<Team[]> => {
   return await teamsStorage.getValue();
 };
 
-export const addTeams = async (team: Team): Promise<void> => {
+export const addTeam = async (team: Team): Promise<void> => {
   const user = await getUser();
 
   if (!user?._id) {
@@ -39,7 +39,7 @@ export const addTeams = async (team: Team): Promise<void> => {
   await teamsStorage.setValue(teams);
 };
 
-export const delTeams = async (teamId: string): Promise<void> => {
+export const delTeam = async (teamId: string): Promise<void> => {
   const teams = await getTeams();
   const index = teams.findIndex((team) => team._id === teamId);
   if (index !== -1) {
