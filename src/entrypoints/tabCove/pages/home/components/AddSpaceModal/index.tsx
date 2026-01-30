@@ -9,20 +9,28 @@ import { Stack, Modal, TextInput, Button, LoadingOverlay, Box, } from '@mantine/
 import { notifications } from '~/utils/notifications';
 
 import { useGlobalStore, } from '~/store/global';
+import { useUserStore, } from '~/store/user';
 import { useTeamsStore, } from '~/store/teams';
+import { useSpacesStore, } from '~/store/spaces';
 
 export default () => {
   const openAddSpacesModal = useGlobalStore(state => state.openAddSpacesModal);
-  const addTeamLoading = useTeamsStore(state => state.addTeamLoading);
+  const addSpaceLoading = useSpacesStore(state => state.addSpaceLoading);
 
   const { setOpenAddSpacesModal,} = useGlobalStore(useShallow(state => ({
     setOpenAddSpacesModal: state.setOpenAddSpacesModal,
   })));
-  const { addTeam,} = useTeamsStore(useShallow(state => ({
-    addTeam: state.addTeam,
+  const { user, } = useUserStore(useShallow(state => ({
+    user: state.user,
+  })));
+  const { curTeam, } = useTeamsStore(useShallow(state => ({
+    curTeam: state.curTeam,
+  })));
+  const { addSpace,} = useSpacesStore(useShallow(state => ({
+    addSpace: state.addSpace,
   })));
 
-  const [teamName, setTeamName] = useState('');
+  const [spaceName, setSpaceName] = useState('');
 
   const handleClose = () => {
     setOpenAddSpacesModal(false);
@@ -39,19 +47,32 @@ export default () => {
           <TextInput
             label="空间名"
             placeholder="请输入空间名"
-            value={teamName}
-            onChange={(event) => setTeamName(event.target.value)}
+            value={spaceName}
+            onChange={(event) => setSpaceName(event.target.value)}
           />
           <Button
             onClick={async () => {
-              if (!teamName) {
+              if (!spaceName) {
                 notifications.warning({ message: '请输入空间名' });
                 return;
               }
 
-              await addTeam({
+              if (!curTeam) {
+                notifications.warning({ message: '请先选择团队' });
+                return;
+              }
+
+              if (!user) {
+                notifications.warning({ message: '请先创建用户' });
+                return;
+              }
+
+              await addSpace({
                 _id: nanoid(),
-                name: teamName,
+                name: spaceName,
+                teamId: curTeam._id,
+                createdBy: user._id,
+                visibility: 'private',
               });
               handleClose();
               notifications.success({ message: '新增空间成功' });
@@ -61,7 +82,7 @@ export default () => {
           </Button>
         </Stack>
 
-        <LoadingOverlay visible={addTeamLoading} overlayProps={{ blur: 2 }} />
+        <LoadingOverlay visible={addSpaceLoading} overlayProps={{ blur: 2 }} />
       </Box>
     </Modal>
   );

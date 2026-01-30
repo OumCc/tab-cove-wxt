@@ -93,7 +93,7 @@ const spacesStore: StateCreator<SpacesStore> = (set) => ({
   },
 });
 
-export const useTeamsStore = create<SpacesStore>()(
+export const useSpacesStore = create<SpacesStore>()(
   devtools(spacesStore, {
     name: 'tabCove_spaces',
     enabled: import.meta.env.DEV,
