@@ -1,11 +1,21 @@
 /*
  * @Description: 定义 @wxt-dev/storage 相关的存储项
  */
-import type { Team, Space, SpaceMembership, Resource, } from '~/types/core';
+import type { User, Team, TeamMembership, Space, SpacePermission, Resource, } from '~/types/core';
 
-export const teamsStorage = storage.defineItem<Team[]>('local:teams', {
+export const usersStorage = storage.defineItem<User[]>('local:users', {
   fallback: [], // 当存储项不存在时返回空数组
   version: 1, // 版本号，便于后续数据迁移
+});
+
+export const teamsStorage = storage.defineItem<Team[]>('local:teams', {
+  fallback: [],
+  version: 1,
+});
+
+export const teamMembershipsStorage = storage.defineItem<TeamMembership[]>('local:teamMemberships', {
+  fallback: [],
+  version: 1,
 });
 
 export const spacesStorage = storage.defineItem<Space[]>('local:spaces', {
@@ -13,7 +23,7 @@ export const spacesStorage = storage.defineItem<Space[]>('local:spaces', {
   version: 1,
 });
 
-export const spaceMembershipsStorage = storage.defineItem<SpaceMembership[]>('local:spaceMemberships', {
+export const spaceMembershipsStorage = storage.defineItem<SpacePermission[]>('local:spaceMemberships', {
   fallback: [],
   version: 1,
 });

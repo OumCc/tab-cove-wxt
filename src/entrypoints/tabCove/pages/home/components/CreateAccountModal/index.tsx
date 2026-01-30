@@ -12,41 +12,41 @@ import { useGlobalStore, } from '~/store/global';
 import { useTeamsStore, } from '@/store/teams';
 
 export default () => {
-  const openAddTeamsModal = useGlobalStore(state => state.openAddTeamsModal);
+  const openCreateAccountModal = useGlobalStore(state => state.openCreateAccountModal);
   const addTeamsLoading = useTeamsStore(state => state.addTeamsLoading);
 
-  const { setOpenAddTeamsModal,} = useGlobalStore(useShallow(state => ({
-    setOpenAddTeamsModal: state.setOpenAddTeamsModal,
+  const { setOpenCreateAccountModal,} = useGlobalStore(useShallow(state => ({
+    setOpenCreateAccountModal: state.setOpenCreateAccountModal,
   })));
   const { addTeams,} = useTeamsStore(useShallow(state => ({
     addTeams: state.addTeams,
   })));
 
-  const [teamName, setTeamName] = useState('');
+  const [accountName, setAccountName] = useState('');
 
   const handleClose = () => {
-    setOpenAddTeamsModal(false);
+    setOpenCreateAccountModal(false);
   }
 
   return (
     <Modal
-      opened={openAddTeamsModal}
+      opened={openCreateAccountModal}
       onClose={handleClose}
       title="创建账号"
     >
       <Stack gap="lg">
         <TextInput
-          label="团队名"
-          placeholder="请输入团队名"
-          value={teamName}
-          onChange={(event) => setTeamName(event.target.value)}
+          label="账号名称"
+          placeholder="请输入账号名称"
+          value={accountName}
+          onChange={(event) => setAccountName(event.target.value)}
         />
         <Button
           loading={addTeamsLoading}
           onClick={async () => {
-            if (!teamName) {
+            if (!accountName) {
               notifications.show({
-                message: '请输入团队名',
+                message: '请输入账号名称',
                 position: 'top-right',
                 icon: <IconExclamationMark />,
                 color: '#faad14'
@@ -56,7 +56,7 @@ export default () => {
 
             await addTeams({
               _id: nanoid(),
-              name: teamName,
+              name: accountName,
             });
             handleClose();
           }}

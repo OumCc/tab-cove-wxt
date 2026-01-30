@@ -1,3 +1,4 @@
+import CreateAccountModal from './components/CreateAccountModal';
 import TeamsMenu from './components/TeamsMenu';
 import AddTeamsModal from './components/AddTeamsModal';
 import Workbench from './components/Workbench';
@@ -23,6 +24,7 @@ export default () => {
       </div>
 
       <AddTeamsModal />
+      <CreateAccountModal />
     </>
   );
 }

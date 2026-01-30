@@ -1,12 +1,13 @@
 import { TabInfo } from '~/entrypoints/background/modules/windowCatalog/types';
 
-export interface Team {
+export interface User {
   _id: string;
   name: string;
   avatar?: string;
 }
 
-export interface User {
+
+export interface Team {
   _id: string;
   name: string;
   avatar?: string;

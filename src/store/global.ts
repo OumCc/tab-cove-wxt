@@ -7,12 +7,20 @@ import { devtools, } from 'zustand/middleware';
 interface GlobalStore {
   openAddTeamsModal: boolean;
   setOpenAddTeamsModal: (openAddTeamsModal: boolean) => void;
+
+  openCreateAccountModal: boolean;
+  setOpenCreateAccountModal: (openCreateAccountModal: boolean) => void;
 };
 
 const globalStore: StateCreator<GlobalStore> = (set) => ({
   openAddTeamsModal: false,
   setOpenAddTeamsModal: (openAddTeamsModal) => {
     set({ openAddTeamsModal });
+  },
+
+  openCreateAccountModal: false,
+  setOpenCreateAccountModal: (openCreateAccountModal) => {
+    set({ openCreateAccountModal });
   },
 });
 
