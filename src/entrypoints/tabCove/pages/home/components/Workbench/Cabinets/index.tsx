@@ -1,5 +1,5 @@
 /*
- * @Description: 储藏柜(Cabinet)
+ * @Description: 储藏柜(Cabinet)列表
  */
 import { useShallow } from 'zustand/react/shallow';
 import { Group, Title, ActionIcon, Tooltip, LoadingOverlay, Stack, Button, ScrollArea, } from '@mantine/core';

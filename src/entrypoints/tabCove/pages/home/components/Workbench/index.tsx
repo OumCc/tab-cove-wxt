@@ -6,7 +6,7 @@ import { Button, Title, } from '@mantine/core';
 
 import Empty from '~/components/Empty';
 import Spaces from './Spaces';
-import Cabinet from './Cabinet';
+import Cabinets from './Cabinets';
 
 import { useGlobalStore, } from '~/store/global';
 import { useTeamsStore, } from '~/store/teams';
@@ -43,7 +43,7 @@ export default () => {
         </div>
 
         <div className={styles.panel__right}>
-          <Cabinet />
+          <Cabinets />
         </div>
       </div>
     );
