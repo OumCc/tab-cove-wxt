@@ -9,7 +9,6 @@ import { Stack, Modal, TextInput, Button, LoadingOverlay, Box, } from '@mantine/
 import { notifications } from '~/utils/notifications';
 
 import { useGlobalStore, } from '~/store/global';
-import { useUserStore, } from '~/store/user';
 import { useTeamsStore, } from '~/store/teams';
 import { useSpacesStore, } from '~/store/spaces';
 
@@ -19,9 +18,6 @@ export default () => {
 
   const { setOpenAddSpacesModal,} = useGlobalStore(useShallow(state => ({
     setOpenAddSpacesModal: state.setOpenAddSpacesModal,
-  })));
-  const { user, } = useUserStore(useShallow(state => ({
-    user: state.user,
   })));
   const { curTeam, } = useTeamsStore(useShallow(state => ({
     curTeam: state.curTeam,
