@@ -28,7 +28,7 @@ export const spaceMembershipsStorage = storage.defineItem<SpacePermission[]>('lo
   version: 1,
 });
 
-export const resourcesStorage = storage.defineItem<Resource[]>('local:resources', {
+export const cabinetsStorage = storage.defineItem<Resource[]>('local:cabinets', {
   fallback: [],
   version: 1,
 });

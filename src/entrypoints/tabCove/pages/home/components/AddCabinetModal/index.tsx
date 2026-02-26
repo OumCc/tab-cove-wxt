@@ -10,6 +10,7 @@ import { notifications } from '~/utils/notifications';
 
 import { useGlobalStore, } from '~/store/global';
 import { useTeamsStore, } from '~/store/teams';
+import { useSpacesStore, } from '~/store/spaces';
 
 export default () => {
   const openAddCabinetModal = useGlobalStore(state => state.openAddCabinetModal);
@@ -20,6 +21,9 @@ export default () => {
   })));
   const { addTeam,} = useTeamsStore(useShallow(state => ({
     addTeam: state.addTeam,
+  })));
+  const { curSpace,} = useSpacesStore(useShallow(state => ({
+    curSpace: state.curSpace,
   })));
 
   const [cabinetName, setCabinetName] = useState('');

@@ -1,8 +1,8 @@
 import { nanoid } from 'nanoid';
 
-import type { User, Team, TeamMembership, Space, SpacePermission, Resource, } from '~/types/core';
+import type { User, Team, TeamMembership, Space, SpacePermission, Cabinet, } from '~/types/core';
 
-import { userStorage, teamsStorage, teamMembershipsStorage, spacesStorage, spaceMembershipsStorage, resourcesStorage, } from '~/utils/storage';
+import { userStorage, teamsStorage, teamMembershipsStorage, spacesStorage, spaceMembershipsStorage, cabinetsStorage, } from '~/utils/storage';
 
 export const getUser = async (): Promise<User | null> => {
   return await userStorage.getValue();
@@ -64,5 +64,24 @@ export const delSpace = async (spaceId: string): Promise<void> => {
   if (index !== -1) {
     spaces.splice(index, 1);
     await spacesStorage.setValue(spaces);
+  }
+};
+
+export const getCabinets = async (): Promise<Cabinet[]> => {
+  return await cabinetsStorage.getValue();
+};
+
+export const addCabinet = async (cabinet: Cabinet): Promise<void> => {
+  const cabinets = await getCabinets();
+  cabinets.push(cabinet);
+  await cabinetsStorage.setValue(cabinets);
+};
+
+export const delCabinet = async (cabinetId: string): Promise<void> => {
+  const cabinets = await getCabinets();
+  const index = cabinets.findIndex((cabinet) => cabinet._id === cabinetId);
+  if (index !== -1) {
+    cabinets.splice(index, 1);
+    await cabinetsStorage.setValue(cabinets);
   }
 };
