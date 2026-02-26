@@ -9,21 +9,21 @@ import { Stack, Modal, TextInput, Button, LoadingOverlay, Box, } from '@mantine/
 import { notifications } from '~/utils/notifications';
 
 import { useGlobalStore, } from '~/store/global';
-import { useTeamsStore, } from '~/store/teams';
 import { useSpacesStore, } from '~/store/spaces';
+import { useCabinetsStore, } from '~/store/cabinets';
 
 export default () => {
   const openAddCabinetModal = useGlobalStore(state => state.openAddCabinetModal);
-  const addTeamLoading = useTeamsStore(state => state.addTeamLoading);
+  const addCabinetLoading = useCabinetsStore(state => state.addCabinetLoading);
 
   const { setOpenAddCabinetModal,} = useGlobalStore(useShallow(state => ({
     setOpenAddCabinetModal: state.setOpenAddCabinetModal,
   })));
-  const { addTeam,} = useTeamsStore(useShallow(state => ({
-    addTeam: state.addTeam,
-  })));
   const { curSpace,} = useSpacesStore(useShallow(state => ({
     curSpace: state.curSpace,
+  })));
+  const { addCabinet,} = useCabinetsStore(useShallow(state => ({
+    addCabinet: state.addCabinet,
   })));
 
   const [cabinetName, setCabinetName] = useState('');
@@ -53,9 +53,16 @@ export default () => {
                 return;
               }
 
-              await addTeam({
+              if (!curSpace) {
+                notifications.warning({ message: '请先选择空间' });
+                return;
+              }
+
+              await addCabinet({
                 _id: nanoid(),
                 name: cabinetName,
+                spaceId: curSpace._id,
+                urls: [],
               });
               handleClose();
               notifications.success({ message: '新增存储柜成功' });
@@ -65,7 +72,7 @@ export default () => {
           </Button>
         </Stack>
 
-        <LoadingOverlay visible={addTeamLoading} overlayProps={{ blur: 2 }} />
+        <LoadingOverlay visible={addCabinetLoading} overlayProps={{ blur: 2 }} />
       </Box>
     </Modal>
   );
