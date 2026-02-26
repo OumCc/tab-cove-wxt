@@ -2,7 +2,7 @@ import { nanoid } from 'nanoid';
 
 import type { User, Team, TeamMembership, Space, SpacePermission, Cabinet, } from '~/types/core';
 
-import { userStorage, teamsStorage, teamMembershipsStorage, spacesStorage, spaceMembershipsStorage, cabinetsStorage, } from '~/utils/storage';
+import { userStorage, teamsStorage, teamMembershipsStorage, spacesStorage, spacePermissionsStorage, cabinetsStorage, } from '~/utils/storage';
 
 export const getUser = async (): Promise<User | null> => {
   return await userStorage.getValue();
@@ -61,18 +61,72 @@ export const delTeam = async (teamId: string): Promise<void> => {
   }
 };
 
-export const getSpaces = async (): Promise<Space[]> => {
-  return await spacesStorage.getValue();
+export const getSpaces = async (teamId: string): Promise<Space[]> => {
+  const user = await getUser();
+
+  if (!user?._id) {
+    throw new Error('用户不存在');
+  }
+
+  const allSpacePermissions = await spacePermissionsStorage.getValue();
+  const allSpaces = await spacesStorage.getValue();
+  const result: Space[] = [];
+
+  allSpaces.forEach((space) => {
+    if (space.teamId === teamId) {
+      switch (space.visibility) {
+        case 'public':
+          result.push(space);
+          break;
+        case 'protected':
+          if (allSpacePermissions.some((permission) => permission.spaceId === space._id && permission.userId === user._id)) {
+            result.push(space);
+          }
+          break;
+        case 'private':
+          if (space.createdBy === user._id) {
+            result.push(space);
+          }
+          break;
+        default:
+          break;
+      }
+    }
+  });
+
+  return result;
 };
 
-export const addSpace = async (space: Space): Promise<void> => {
-  const spaces = await getSpaces();
-  spaces.push(space);
-  await spacesStorage.setValue(spaces);
+export const addSpace = async (space: Omit<Space, 'createdBy'>): Promise<Space> => {
+  const user = await getUser();
+
+  if (!user?._id) {
+    throw new Error('用户不存在');
+  }
+
+  const newSpace = {
+    ...space,
+    createdBy: user._id,
+  };
+
+  const allSpacePermissions = await spacePermissionsStorage.getValue();
+  const allSpaces = await spacesStorage.getValue();
+
+  allSpacePermissions.push({
+    _id: nanoid(),
+    spaceId: newSpace._id,
+    userId: user._id,
+  });
+  allSpaces.push(newSpace);
+  
+  await spacePermissionsStorage.setValue(allSpacePermissions);
+  await spacesStorage.setValue(allSpaces);
+
+  return newSpace;
 };
 
 export const delSpace = async (spaceId: string): Promise<void> => {
-  const spaces = await getSpaces();
+  const spaces = await spacesStorage.getValue();
   const index = spaces.findIndex((space) => space._id === spaceId);
   if (index !== -1) {
     spaces.splice(index, 1);

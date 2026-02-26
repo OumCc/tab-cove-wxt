@@ -7,6 +7,7 @@ import { Group, Title, ActionIcon, Tooltip, LoadingOverlay, Stack, Button, } fro
 import { IconPlus } from '@tabler/icons-react';
 
 import { useGlobalStore, } from '~/store/global';
+import { useTeamsStore, } from '~/store/teams';
 import { useSpacesStore, } from '~/store/spaces';
 
 import styles from './index.module.less';
@@ -14,6 +15,11 @@ import styles from './index.module.less';
 export default () => {
   const { setOpenAddSpacesModal,} = useGlobalStore(useShallow(state => ({
     setOpenAddSpacesModal: state.setOpenAddSpacesModal,
+  })));
+  const {
+    curTeam,
+  } = useTeamsStore(useShallow(state => ({
+    curTeam: state.curTeam,
   })));
   const getSpacesLoading = useSpacesStore(state => state.getSpacesLoading);
   const { spaces, curSpace, setCurSpace, getSpaces,} = useSpacesStore(useShallow(state => ({
@@ -24,8 +30,10 @@ export default () => {
   })));
 
   useEffect(() => {
-    getSpaces();
-  }, []);
+    if (curTeam?._id) {
+      getSpaces(curTeam._id);
+    }
+  }, [curTeam]);
 
   return (
     <div className={styles.box}>

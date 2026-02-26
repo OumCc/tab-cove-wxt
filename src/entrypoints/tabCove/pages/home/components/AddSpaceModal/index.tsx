@@ -62,16 +62,10 @@ export default () => {
                 return;
               }
 
-              if (!user) {
-                notifications.warning({ message: '请先创建用户' });
-                return;
-              }
-
               await addSpace({
                 _id: nanoid(),
                 name: spaceName,
                 teamId: curTeam._id,
-                createdBy: user._id,
                 visibility: 'private',
               });
               handleClose();

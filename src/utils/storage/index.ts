@@ -1,7 +1,7 @@
 /*
  * @Description: 定义 @wxt-dev/storage 相关的存储项
  */
-import type { User, Team, TeamMembership, Space, SpacePermission, Resource, } from '~/types/core';
+import type { User, Team, TeamMembership, Space, SpacePermission, Cabinet, } from '~/types/core';
 
 export const userStorage = storage.defineItem<User | null>('local:user', {
   fallback: null, // 当存储项不存在时返回空
@@ -23,12 +23,12 @@ export const spacesStorage = storage.defineItem<Space[]>('local:spaces', {
   version: 1,
 });
 
-export const spaceMembershipsStorage = storage.defineItem<SpacePermission[]>('local:spaceMemberships', {
+export const spacePermissionsStorage = storage.defineItem<SpacePermission[]>('local:spacePermissions', {
   fallback: [],
   version: 1,
 });
 
-export const cabinetsStorage = storage.defineItem<Resource[]>('local:cabinets', {
+export const cabinetsStorage = storage.defineItem<Cabinet[]>('local:cabinets', {
   fallback: [],
   version: 1,
 });

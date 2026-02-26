@@ -24,7 +24,7 @@ export interface Space {
   name: string;
   teamId: string; // space 所属的 team
   createdBy: string; // space 的创建者的 userId
-  visibility: 'public' | 'protected' | 'private';
+  visibility: 'public' | 'protected' | 'private'; // public: 公开，team 中的所有成员都可见；protected: 受保护，team 中只有被授权过的成员可见；private: 私有，只有创建者可见
 }
 
 export interface SpacePermission {

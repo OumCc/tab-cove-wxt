@@ -15,13 +15,13 @@ interface SpacesStore {
   setCurSpace: (space: Space) => void;
 
   getSpacesLoading: boolean;
-  getSpaces: () => Promise<Space[]>;
+  getSpaces: (teamId: string) => Promise<Space[]>;
 
   addSpaceLoading: boolean;
-  addSpace: (space: Space) => Promise<void>;
+  addSpace: (space: Omit<Space, 'createdBy'>) => Promise<void>;
 
   delSpaceLoading: boolean;
-  delSpace: (teamId: string) => Promise<void>;
+  delSpace: (spaceId: string) => Promise<void>;
 };
 
 const spacesStore: StateCreator<SpacesStore> = (set) => ({
@@ -33,10 +33,10 @@ const spacesStore: StateCreator<SpacesStore> = (set) => ({
   },
 
   getSpacesLoading: false,
-  getSpaces: async () => {
+  getSpaces: async (teamId) => {
     try {
       set({ getSpacesLoading: true, });
-      const res = await api.getSpaces();
+      const res = await api.getSpaces(teamId);
 
       set((state) => {
         const temp: any = {
@@ -58,15 +58,15 @@ const spacesStore: StateCreator<SpacesStore> = (set) => ({
   },
 
   addSpaceLoading: false,
-  addSpace: async (space: Space) => {
+  addSpace: async (space) => {
     try {
       set({ addSpaceLoading: true, });
-      await api.addSpace(space);
+      const res = await api.addSpace(space);
 
       set((state) => {
         return {
-          spaces: [...state.spaces, space,],
-          curSpace: space,
+          spaces: [...state.spaces, res,],
+          curSpace: res,
         };
       });
     } finally {
@@ -75,16 +75,16 @@ const spacesStore: StateCreator<SpacesStore> = (set) => ({
   },
 
   delSpaceLoading: false,
-  delSpace: async (teamId: string) => {
+  delSpace: async (spaceId: string) => {
     try {
       set({ delSpaceLoading: true, });
-      await api.delSpace(teamId);
+      await api.delSpace(spaceId);
 
       set((state) => {
-        const tempSpaces = state.spaces.filter((space) => space._id !== teamId);
+        const tempSpaces = state.spaces.filter((space) => space._id !== spaceId);
         return {
           spaces: tempSpaces,
-          curSpace: state.curSpace?._id === teamId ? tempSpaces[0] : state.curSpace,
+          curSpace: state.curSpace?._id === spaceId ? tempSpaces[0] : state.curSpace,
         };
       });
     } finally {
