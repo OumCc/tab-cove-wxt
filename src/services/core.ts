@@ -134,21 +134,22 @@ export const delSpace = async (spaceId: string): Promise<void> => {
   }
 };
 
-export const getCabinets = async (): Promise<Cabinet[]> => {
-  return await cabinetsStorage.getValue();
+export const getCabinets = async (spaceId: string): Promise<Cabinet[]> => {
+  const allCabinets = await cabinetsStorage.getValue();
+  return allCabinets.filter((cabinet) => cabinet.spaceId === spaceId);
 };
 
 export const addCabinet = async (cabinet: Cabinet): Promise<void> => {
-  const cabinets = await getCabinets();
-  cabinets.push(cabinet);
-  await cabinetsStorage.setValue(cabinets);
+  const allCabinets = await cabinetsStorage.getValue();
+  allCabinets.push(cabinet);
+  await cabinetsStorage.setValue(allCabinets);
 };
 
 export const delCabinet = async (cabinetId: string): Promise<void> => {
-  const cabinets = await getCabinets();
-  const index = cabinets.findIndex((cabinet) => cabinet._id === cabinetId);
+  const allCabinets = await cabinetsStorage.getValue();
+  const index = allCabinets.findIndex((cabinet) => cabinet._id === cabinetId);
   if (index !== -1) {
-    cabinets.splice(index, 1);
-    await cabinetsStorage.setValue(cabinets);
+    allCabinets.splice(index, 1);
+    await cabinetsStorage.setValue(allCabinets);
   }
 };

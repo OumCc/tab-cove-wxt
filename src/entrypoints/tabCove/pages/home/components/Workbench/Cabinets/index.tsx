@@ -7,6 +7,7 @@ import { Group, Title, ActionIcon, Tooltip, LoadingOverlay, Stack, Button, Scrol
 import { IconPlus } from '@tabler/icons-react';
 
 import { useGlobalStore, } from '~/store/global';
+import { useSpacesStore, } from '~/store/spaces';
 import { useCabinetsStore, } from '~/store/cabinets';
 
 import styles from './index.module.less';
@@ -15,6 +16,9 @@ export default () => {
   const { setOpenAddCabinetModal,} = useGlobalStore(useShallow(state => ({
     setOpenAddCabinetModal: state.setOpenAddCabinetModal,
   })));
+  const { curSpace,} = useSpacesStore(useShallow(state => ({
+    curSpace: state.curSpace,
+  })));
   const getCabinetsLoading = useCabinetsStore(state => state.getCabinetsLoading);
   const { cabinets, getCabinets,} = useCabinetsStore(useShallow(state => ({
     cabinets: state.cabinets,
@@ -22,8 +26,10 @@ export default () => {
   })));
 
   useEffect(() => {
-    getCabinets();
-  }, []);
+    if (curSpace?._id) {
+      getCabinets(curSpace._id);
+    }
+  }, [curSpace]);
 
   return (
     <div className={styles.box}>

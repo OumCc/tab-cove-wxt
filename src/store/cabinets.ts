@@ -12,7 +12,7 @@ interface CabinetsStore {
   cabinets: Cabinet[];
 
   getCabinetsLoading: boolean;
-  getCabinets: () => Promise<Cabinet[]>;
+  getCabinets: (spaceId: string) => Promise<Cabinet[]>;
 
   addCabinetLoading: boolean;
   addCabinet: (cabinet: Cabinet) => Promise<void>;
@@ -25,10 +25,10 @@ const cabinetsStore: StateCreator<CabinetsStore> = (set) => ({
   cabinets: [],
 
   getCabinetsLoading: false,
-  getCabinets: async () => {
+  getCabinets: async (spaceId) => {
     try {
       set({ getCabinetsLoading: true, });
-      const res = await api.getCabinets();
+      const res = await api.getCabinets(spaceId);
 
       set({ cabinets: res });
 
