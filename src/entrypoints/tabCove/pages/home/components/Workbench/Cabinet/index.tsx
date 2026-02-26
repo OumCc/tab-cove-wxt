@@ -16,18 +16,21 @@ export default () => {
 
   return (
     <div className={styles.box}>
-      <ScrollArea h="100%">
-        <div>
-          <Button
-            leftSection={<IconPlus size={14} />}
-            onClick={() => {
-              setOpenAddCabinetModal(true);
-            }}
-          >
-            新增储藏柜
-          </Button>
-        </div>
-      </ScrollArea>
+      <div className={styles.box__hd}>
+        <Button
+          leftSection={<IconPlus size={14} />}
+          onClick={() => {
+            setOpenAddCabinetModal(true);
+          }}
+        >
+          新增储藏柜
+        </Button>
+      </div>
+      <div className={styles.box__bd}>
+        <ScrollArea h="100%">
+          <div>111</div>
+        </ScrollArea>
+      </div>
     </div>
   );
 };
