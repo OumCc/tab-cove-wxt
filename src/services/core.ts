@@ -13,7 +13,17 @@ export const createUser = async (user: User): Promise<void> => {
 };
 
 export const getTeams = async (): Promise<Team[]> => {
-  return await teamsStorage.getValue();
+  const user = await getUser();
+
+  if (!user?._id) {
+    throw new Error('用户不存在');
+  }
+
+  const teamMemberships = await teamMembershipsStorage.getValue();
+  const ownTeams = teamMemberships.filter((teamMembership) => teamMembership.userId === user._id);
+  const allTeams = await teamsStorage.getValue();
+
+  return allTeams.filter((team) => ownTeams.some((ownTeam) => ownTeam.teamId === team._id));
 };
 
 export const addTeam = async (team: Team): Promise<void> => {
@@ -42,6 +52,9 @@ export const addTeam = async (team: Team): Promise<void> => {
 export const delTeam = async (teamId: string): Promise<void> => {
   const teams = await getTeams();
   const index = teams.findIndex((team) => team._id === teamId);
+
+  // FIXME: 按理这里要检查需要删除的 team 是否属于当前用户，但目前是离线版，暂时没有这个必要
+
   if (index !== -1) {
     teams.splice(index, 1);
     await teamsStorage.setValue(teams);
