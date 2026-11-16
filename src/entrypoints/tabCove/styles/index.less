@@ -20,7 +20,9 @@ button { -webkit-tap-highlight-color: transparent; }
 .sidebar .label { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .brand { display: flex; align-items: center; gap: 10px; height: 32px; margin-bottom: 16px; padding-left: 4px; font-size: 15px; letter-spacing: -.2px; color: var(--tc-text-strong); }
 .brand-mark { width: 24px; height: 24px; border-radius: 7px; background: var(--tc-brand); display: grid; place-items: center; flex-shrink: 0; }
-.brand-mark span { width: 12px; height: 8px; border: 2px solid var(--tc-on-brand); border-top: 0; border-radius: 1px 1px 5px 5px; }
+.brand-mark svg { width: 100%; height: 100%; }
+.brand-mark path { fill: none; stroke: var(--tc-on-brand); stroke-width: 13; stroke-linecap: round; }
+.brand-mark rect { fill: var(--tc-on-brand); opacity: .7; }
 .search-trigger { display: flex; align-items: center; gap: 8px; width: 100%; height: 32px; flex-shrink: 0; border: 1px solid var(--tc-border-strong); background: transparent; color: var(--tc-text-muted); border-radius: 8px; padding: 0 7px; text-align: left; }
 .search-trigger:hover:not(:disabled) { background: var(--tc-hover); color: var(--tc-text-strong); }
 .search-trigger svg { flex-shrink: 0; }

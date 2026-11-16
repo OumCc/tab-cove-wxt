@@ -173,7 +173,7 @@ function Workspace() {
 
   return <div className={`workspace ${sidebarCollapsed ? 'sidebar-rail' : ''} ${!rightbar ? 'rightbar-hidden' : ''} ${drag ? 'is-dragging' : ''}`} onDragOver={autoScroll} onDrop={event => { if (!event.defaultPrevented) clearDrag(); }}>
     <aside className="sidebar">
-      <div className="brand"><span className="brand-mark" aria-hidden="true"><span /></span><strong className="label">Tab Cove</strong></div>
+      <div className="brand"><span className="brand-mark" aria-hidden="true"><svg viewBox="0 0 128 128"><path d="M88 40A34 34 0 1 0 88 88" /><rect x="49" y="51" width="30" height="26" rx="8" /></svg></span><strong className="label">Tab Cove</strong></div>
       <button className="search-trigger" title="Search (/)" disabled={!library} onClick={() => setSearch(true)}><IconSearch size={16} /><span className="label">Search</span><kbd>/</kbd></button>
       <div className="spaces-heading"><span className="label">Spaces</span></div>
       <nav className="spaces-list" aria-label="Spaces" data-scroll-panel>
