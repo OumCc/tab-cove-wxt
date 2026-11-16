@@ -1,41 +1,28 @@
-import { TabInfo } from '~/entrypoints/background/modules/windowCatalog/types';
-
-export interface User {
-  _id: string;
-  name: string;
-  avatar?: string;
-}
-
-export interface Team {
-  _id: string;
-  name: string;
-  avatar?: string;
-}
-
-export interface TeamMembership {
-  _id: string;
-  teamId: string;
-  userId: string;
-  role: 'owner' | 'admin' | 'member';
-}
-
-export interface Space {
-  _id: string;
-  name: string;
-  teamId: string; // space 所属的 team
-  createdBy: string; // space 的创建者的 userId
-  visibility: 'public' | 'protected' | 'private'; // public: 公开，team 中的所有成员都可见；protected: 受保护，team 中只有被授权过的成员可见；private: 私有，只有创建者可见
-}
-
-export interface SpacePermission {
-  _id: string;
-  spaceId: string;
-  userId: string; // 被授权的用户
-}
-
-export interface Cabinet {
-  _id: string;
-  name: string;
-  spaceId: string;
-  urls: TabInfo[];
-}
+/** 本地资料库及跨上下文命令；永久收藏不引用浏览器会话标识。 */
+export type GroupColor = 'grey' | 'blue' | 'red' | 'yellow' | 'green' | 'pink' | 'purple' | 'cyan' | 'orange';
+export interface SavedTab { id: string; title: string; url: string }
+export interface Collection { id: string; name: string; tabs: SavedTab[]; groupColor?: GroupColor }
+export interface Space { id: string; name: string; collections: Collection[] }
+export interface Preferences { saveDisposition: 'ask' | 'keep' | 'close'; restoreMode: 'ask' | 'tabs' | 'group' }
+export interface LibraryDocument { schemaVersion: 1; revision: number; spaces: Space[]; preferences: Preferences }
+export type LibraryCommand =
+  | { type: 'space:create'; name: string }
+  | { type: 'space:rename'; id: string; name: string }
+  | { type: 'space:delete'; id: string }
+  | { type: 'space:move'; id: string; beforeId?: string }
+  | { type: 'collection:create'; spaceId: string; name: string; beforeId?: string; groupColor?: GroupColor }
+  | { type: 'collection:rename'; id: string; name: string }
+  | { type: 'collection:delete'; id: string }
+  | { type: 'collection:move'; id: string; spaceId: string; beforeId?: string }
+  | { type: 'collection:merge'; id: string; targetId: string }
+  | { type: 'tab:edit'; id: string; title: string; url: string }
+  | { type: 'tab:delete'; id: string }
+  | { type: 'tab:move'; id: string; collectionId: string; beforeId?: string }
+  | { type: 'tab:newCollection'; id: string; spaceId: string; name: string; beforeId?: string }
+  | { type: 'tabs:save'; target: SaveTarget; tabs: { title: string; url: string }[]; preference?: 'keep' | 'close' }
+  | { type: 'preferences'; patch: Partial<Preferences> };
+export type SaveTarget =
+  | { collectionId: string; beforeId?: string }
+  | { spaceId: string; name: string; beforeId?: string; groupColor?: GroupColor };
+export type ErrorCode = 'INVALID_INPUT' | 'NOT_FOUND' | 'STORAGE_READ_FAILED' | 'STORAGE_WRITE_FAILED' | 'UNSUPPORTED_SCHEMA' | 'BROWSER_OPERATION_FAILED';
+export type Result<T> = { ok: true; value: T } | { ok: false; code: ErrorCode; message: string };

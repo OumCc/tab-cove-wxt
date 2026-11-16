@@ -1,3 +1,47 @@
-# WXT + React
+# Tab Cove
 
-This template should help get you started developing with React in WXT.
+基于 WXT、React、TypeScript、Mantine、Zustand 的单机 Chrome 标签工作台。保留独立页面入口，点击扩展图标打开或聚焦工作台，不接管 Chrome 新标签页。
+
+![隔离数据预览](docs/workspace-preview.jpg)
+
+## 首版能力
+
+- 空间、集合与收藏卡片管理；重命名、编辑 URL、移动、排序、合并。
+- 浏览器窗口、原生标签组和实时标签目录；聚焦、关闭、移动、组名／颜色／折叠和取消分组。
+- 整窗、原生组、单标签保存；保存后保持或关闭；恢复为普通标签或原生组。
+- 本地分类搜索，`/` 或 `Ctrl/Cmd + K` 打开；方向键导航，Enter 打开，集合结果可单独跳转。
+- 卡片和集合拖拽、跨空间移动、间隙新建集合、实时标签与收藏之间拖拽；菜单提供移动、排序、合并等键盘替代入口。
+
+账号、联网同步、协作、Next、独立笔记、AI、Tags、星标、自定义集合颜色、主题、去重、导入导出不在首版范围。原生标签组颜色属于已实现范围。
+
+## 构建与加载
+
+使用现有 `pnpm-lock.yaml` 与 pnpm，Node 版本见 `.nvmrc` 和 `package.json`。已有完整依赖时直接运行：
+
+```sh
+pnpm run test
+pnpm run compile
+pnpm run build
+```
+
+在 Chrome 扩展管理页面打开开发者模式，选择“加载已解压的扩展程序”，加载本项目的 `.output/chrome-mv3` 目录。固定 Tab Cove 图标并点击即可进入。更新代码后重新构建，再在扩展管理页点击重新加载。开发使用 `pnpm run dev`。
+
+## 本地数据与会话边界
+
+资料库存于当前浏览器配置文件的 `chrome.storage.local`，键为 `tabCoveLibrary`，不读取或覆盖旧项目账号／团队数据。仅在此键不存在时初始化 `Personal` 空间；损坏或未知版本会报错而不会重置。
+
+保存仅接受 HTTP/HTTPS 页面。右侧目录及会话快照排除所有插件页面，整窗保存另排除固定标签；单独保存固定标签不会关闭它。先成功写入收藏，再复查源标签 URL、待导航 URL、窗口、组及固定状态后关闭。重复 URL 会保留。
+
+恢复保留 URL、顺序和原生组名称／颜色，不恢复网页表单、站点运行状态或历史。部分失败会提示，并在可确定完成状态时仅重试未完成步骤。连接中断后先刷新核对实际结果，再决定是否重复操作。
+
+数据有浏览器容量限制，卸载扩展或清除扩展数据会删除资料库。本版本没有导出备份功能。
+
+## UI 预览与验证
+
+```sh
+pnpm run preview:ui
+```
+
+打开终端打印的本地地址。预览复用实际 UI 和领域服务，浏览器目录使用隔离 fixture，收藏写入该预览 origin 的 localStorage；不会操作用户的真实窗口。预览不能用于证明 Chrome API、后台生命周期、离线扩展或拖拽的端到端正确性。测试文件不会打入生产扩展。
+
+当前 41 条 Node 单元测试通过；类型检查、生产构建、OpenSpec 严格校验通过。生产构建存在单个 JavaScript chunk 超过 500 kB 的提示，不影响产物生成。用户已确认真实 Chrome／Toby 验收清单通过；唯一反馈的插件页面显示差异已修复。详细证据见 [验证记录](openspec/changes/rebuild-local-tab-workspace/validation.md)。

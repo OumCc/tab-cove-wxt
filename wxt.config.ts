@@ -7,7 +7,8 @@ export default defineConfig({
   srcDir: 'src',
 
   manifest: {
-    permissions: [ 'tabs', 'windows', 'alarms', 'storage', ],
+    name: 'Tab Cove',
+    permissions: ['tabs', 'storage', 'tabGroups', 'favicon'],
     action: {},
   },
 

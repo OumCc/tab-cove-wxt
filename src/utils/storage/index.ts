@@ -1,34 +1,10 @@
-/*
- * @Description: 定义 @wxt-dev/storage 相关的存储项
- */
-import type { User, Team, TeamMembership, Space, SpacePermission, Cabinet, } from '~/types/core';
-
-export const userStorage = storage.defineItem<User | null>('local:user', {
-  fallback: null, // 当存储项不存在时返回空
-  version: 1, // 版本号，便于后续数据迁移
-});
-
-export const teamsStorage = storage.defineItem<Team[]>('local:teams', {
-  fallback: [],
-  version: 1,
-});
-
-export const teamMembershipsStorage = storage.defineItem<TeamMembership[]>('local:teamMemberships', {
-  fallback: [],
-  version: 1,
-});
-
-export const spacesStorage = storage.defineItem<Space[]>('local:spaces', {
-  fallback: [],
-  version: 1,
-});
-
-export const spacePermissionsStorage = storage.defineItem<SpacePermission[]>('local:spacePermissions', {
-  fallback: [],
-  version: 1,
-});
-
-export const cabinetsStorage = storage.defineItem<Cabinet[]>('local:cabinets', {
-  fallback: [],
-  version: 1,
-});
+/** 只使用独立的 local 键；旧版本的用户、团队及收藏键保持原值。 */
+import { browser } from 'wxt/browser';
+import type { LibraryStorage } from '../../services/libraryRepository.ts';
+/** 原生 storage.local 不包含 WXT 的区域前缀。 */
+export const LIBRARY_KEY = 'tabCoveLibrary';
+/** 仅由 background 的 repository 调用写入，读取不设置 fallback。 */
+export const libraryStorage: LibraryStorage = {
+  async get() { const result = await browser.storage.local.get(LIBRARY_KEY); return result[LIBRARY_KEY]; },
+  async set(value) { await browser.storage.local.set({ [LIBRARY_KEY]: value }); },
+};
