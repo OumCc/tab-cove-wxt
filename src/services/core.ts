@@ -1,4 +1,5 @@
 /** 工作台命令客户端；不重试有副作用请求，连接中断时提示重新核对实际结果。 */
+import { getLocale } from '../i18n/index.ts';
 import { sendMessage } from '../types/messaging.ts';
 import { AppError } from './libraryModel.ts';
 import type { Result, LibraryCommand } from '../types/core.ts';
@@ -16,6 +17,6 @@ export const mutateLibrary = (command: LibraryCommand) => unwrap(sendMessage('li
 /** 获取即时浏览器目录；不会使用持久化的旧 tabId。 */
 export const getSnapshot = () => unwrap(sendMessage('browser:getSnapshot'));
 /** 读取保存前的固定快照，取消确认不会发生副作用。 */
-export const getSavePreview = (source: TabSource) => unwrap(sendMessage('browser:previewSave', source));
+export const getSavePreview = (source: TabSource) => unwrap(sendMessage('browser:previewSave', { ...source, locale: getLocale() }));
 /** 执行浏览器操作并返回完整或部分成功报告。 */
-export const browserOperation = (operation: BrowserOperation) => unwrap(sendMessage('browser:operate', operation));
+export const browserOperation = (operation: BrowserOperation) => unwrap(sendMessage('browser:operate', { ...operation, locale: getLocale() }));

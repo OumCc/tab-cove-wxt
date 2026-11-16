@@ -1,0 +1,14 @@
+{
+  "extensionName": {
+    "message": "Tab Cove"
+  },
+  "extensionDescription": {
+    "message": "在本機整理分頁、集合和瀏覽器工作階段。"
+  },
+  "actionTitle": {
+    "message": "開啟 Tab Cove"
+  },
+  "defaultSpaceName": {
+    "message": "個人"
+  }
+}

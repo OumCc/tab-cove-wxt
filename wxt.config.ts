@@ -7,9 +7,11 @@ export default defineConfig({
   srcDir: 'src',
 
   manifest: {
-    name: 'Tab Cove',
+    name: '__MSG_extensionName__',
+    description: '__MSG_extensionDescription__',
+    default_locale: 'en',
     permissions: ['tabs', 'storage', 'tabGroups', 'favicon'],
-    action: {},
+    action: { default_title: '__MSG_actionTitle__' },
   },
 
   vite: ({ mode } : { mode: string}) => {

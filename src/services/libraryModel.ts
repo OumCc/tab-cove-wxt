@@ -34,8 +34,8 @@ export function validateLibrary(value: unknown): asserts value is LibraryDocumen
   }
 }
 /** 仅在确认存储项缺失后创建独立的本地初始资料库。 */
-export function emptyLibrary(id: () => string): LibraryDocument {
-  return { schemaVersion: 1, revision: 0, spaces: [{ id: id(), name: 'Personal', collections: [] }], preferences: { saveDisposition: 'ask', restoreMode: 'ask' } };
+export function emptyLibrary(id: () => string, initialSpaceName = 'Personal'): LibraryDocument {
+  return { schemaVersion: 1, revision: 0, spaces: [{ id: id(), name: initialSpaceName, collections: [] }], preferences: { saveDisposition: 'ask', restoreMode: 'ask' } };
 }
 /** 找不到目标时失败，避免并发操作复活已删除对象。 */
 export function findCollection(d: LibraryDocument, id: string): { space: Space; collection: Collection } {

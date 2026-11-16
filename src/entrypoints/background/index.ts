@@ -13,7 +13,7 @@ import type { Result } from '../../types/core.ts';
 import type { BrowserSnapshot, LiveGroup } from '../../types/browser.ts';
 
 export default defineBackground(() => {
-  const repo = createLibraryRepository(libraryStorage, nanoid);
+  const repo = createLibraryRepository(libraryStorage, nanoid, browser.i18n.getMessage('defaultSpaceName'));
   const epoch = nanoid(); let sequence = 0; let timer: ReturnType<typeof setTimeout> | undefined;
   async function result<T>(run: () => Promise<T>): Promise<Result<T>> {
     try { return { ok: true, value: await run() }; }

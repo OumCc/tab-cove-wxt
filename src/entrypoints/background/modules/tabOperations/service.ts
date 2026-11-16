@@ -1,4 +1,6 @@
 /** 会话编排：先保存再关闭；浏览器部分失败返回可针对性重试的剩余操作。 */
+import { countLabel, sessionName, translate } from '../../../../i18n/core.ts';
+import type { MessageKey } from '../../../../i18n/messages.ts';
 import { AppError, validUrl } from '../../../../services/libraryModel.ts';
 import type { createLibraryRepository } from '../../../../services/libraryRepository.ts';
 import type { BrowserOperation, LiveGroup, LiveTab, OpenTarget, OperationReport, SavePreview, TabSource } from '../../../../types/browser.ts';
@@ -22,13 +24,15 @@ export async function previewSave(port: BrowserPort, source: TabSource, now = ne
   const all = await port.getTabs(source.windowId);
   const tabs = all.filter(t => validUrl(t.url) && (source.tabId === undefined ? !t.pinned : t.id === source.tabId) && (source.groupId === undefined || t.groupId === source.groupId)).sort((a, b) => a.index - b.index);
   if (!tabs.length) throw new AppError('INVALID_INPUT', 'There are no web tabs to save. Pinned tabs are excluded from a session.');
-  const dateName = `${now.toLocaleDateString('en', { month: 'short', day: 'numeric' })} at ${now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`;
+  const dateName = sessionName(source.locale || 'en', now);
   if (source.groupId !== undefined) { const group = await port.getGroup(source.groupId); return { tabs, name: group.title || dateName, groupColor: group.color }; }
   return { tabs, name: dateName };
 }
 /** 在存储／浏览器端口之间执行一次用户动作，不自动重放未知完成状态的请求。 */
 export async function operate(port: BrowserPort, repo: Repository, operation: BrowserOperation): Promise<OperationReport> {
-  const report: OperationReport = { message: 'Done', failures: [] };
+  const locale = operation.locale || 'en';
+  const t = (key: MessageKey, params?: Record<string, string | number>) => translate(locale, key, params);
+  const report: OperationReport = { message: t('Done'), failures: [] };
   switch (operation.type) {
     case 'focus': await port.focus(operation.tabId); break;
     case 'close': await port.close(operation.tabId); break;
@@ -43,11 +47,11 @@ export async function operate(port: BrowserPort, repo: Repository, operation: Br
           const current = await port.getTab(saved.id);
           if (!current) continue;
           if (current.pinned) continue;
-          if (current.url !== saved.url || (current.pendingUrl && current.pendingUrl !== saved.url) || current.windowId !== saved.windowId || current.groupId !== saved.groupId) { report.failures.push(`${saved.title}: saved, but left open because the page changed.`); continue; }
+          if (current.url !== saved.url || (current.pendingUrl && current.pendingUrl !== saved.url) || current.windowId !== saved.windowId || current.groupId !== saved.groupId) { report.failures.push(t('{name}: saved, but left open because the page changed.', { name: saved.title })); continue; }
           await port.close(saved.id);
-        } catch { report.failures.push(`${saved.title}: saved, but could not be closed.`); }
+        } catch { report.failures.push(t('{name}: saved, but could not be closed.', { name: saved.title })); }
       }
-      report.message = `${operation.preview.tabs.length} ${operation.preview.tabs.length === 1 ? 'tab' : 'tabs'} saved`; break;
+      report.message = countLabel(locale, 'saved', operation.preview.tabs.length); break;
     }
     case 'open': {
       if (!operation.items.length) throw new AppError('INVALID_INPUT', 'This collection is empty.');
@@ -64,7 +68,7 @@ export async function operate(port: BrowserPort, repo: Repository, operation: Br
         try {
           const target = { ...operation.target, ...(nextOpened ? { beforeTabId: opened[nextOpened.id] } : {}) };
           opened[item.id] = await port.create(item.url, target);
-        } catch { report.failures.push(`${item.title}: could not be opened.`); }
+        } catch { report.failures.push(t('{name}: could not be opened.', { name: item.title })); }
       }
       const ids: number[] = [];
       for (const item of operation.items) {
@@ -72,9 +76,9 @@ export async function operate(port: BrowserPort, repo: Repository, operation: Br
         if (tabId === undefined) continue;
         let tab: LiveTab | undefined;
         try { tab = await port.getTab(tabId); }
-        catch { inspectionFailed = true; report.failures.push(`${item.title}: opened, but its current state could not be checked.`); continue; }
+        catch { inspectionFailed = true; report.failures.push(t('{name}: opened, but its current state could not be checked.', { name: item.title })); continue; }
         if (!tab || tab.windowId !== operation.target.windowId) {
-          report.failures.push(`${item.title}: the opened page has changed. It was not moved or reopened.`);
+          report.failures.push(t('{name}: the opened page has changed. It was not moved or reopened.', { name: item.title }));
           continue;
         }
         ids.push(tabId);
@@ -83,18 +87,18 @@ export async function operate(port: BrowserPort, repo: Repository, operation: Br
         try {
           groupId = await port.group(ids, operation.target.windowId, groupId);
           if (operation.group) await port.editGroup(groupId, operation.group);
-        } catch { groupFailed = true; report.failures.push('Tabs are open, but their group could not be completed.'); }
+        } catch { groupFailed = true; report.failures.push(t('Tabs are open, but their group could not be completed.')); }
       }
       if (ids.length && !operation.group && groupId === undefined) {
         try { await port.ungroupTabs(ids); }
-        catch { groupFailed = true; report.failures.push('Tabs are open, but could not be removed from an inherited browser group.'); }
+        catch { groupFailed = true; report.failures.push(t('Tabs are open, but could not be removed from an inherited browser group.')); }
       }
       if (operation.items.some(item => opened[item.id] === undefined) || groupFailed || inspectionFailed) {
         report.retry = { ...operation, opened, target: { ...operation.target, ...(groupId !== undefined ? { groupId } : {}) }, remember: undefined };
       }
       if (operation.activate && ids.length === 1 && !report.failures.length) try { await port.focus(ids[0]!); }
-      catch { report.failures.push('The page opened, but could not be focused.'); }
-      report.message = `${Object.keys(opened).length} ${Object.keys(opened).length === 1 ? 'tab' : 'tabs'} opened`; break;
+      catch { report.failures.push(t('The page opened, but could not be focused.')); }
+      report.message = countLabel(locale, 'opened', Object.keys(opened).length); break;
     }
     default: throw new AppError('INVALID_INPUT', 'Unknown browser action.');
   }

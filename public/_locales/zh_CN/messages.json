@@ -1,0 +1,14 @@
+{
+  "extensionName": {
+    "message": "Tab Cove"
+  },
+  "extensionDescription": {
+    "message": "在本地整理标签页、集合和浏览器会话。"
+  },
+  "actionTitle": {
+    "message": "打开 Tab Cove"
+  },
+  "defaultSpaceName": {
+    "message": "个人"
+  }
+}

@@ -26,6 +26,14 @@ pnpm run build
 
 在 Chrome 扩展管理页面打开开发者模式，选择“加载已解压的扩展程序”，加载本项目的 `.output/chrome-mv3` 目录。固定 Tab Cove 图标并点击即可进入。更新代码后重新构建，再在扩展管理页点击重新加载。开发使用 `pnpm run dev`。
 
+## 界面语言
+
+支持 English、简体中文和繁體中文。侧栏底部的“语言”菜单可即时切换，选择保存在当前设备；默认跟随浏览器首选语言，未匹配时使用英文。中文按脚本与地区识别，港澳台默认繁体。多个工作台页面会同步语言选择。
+
+界面、搜索、弹窗、操作提示、数量与新会话日期均使用所选语言；已有空间名、集合名、网页标题和网址保持原样。扩展管理页描述、图标提示及首次创建的个人空间名由浏览器语言决定。语言偏好存于 `tabCoveUiPreferences`，不写入资料库文档；存储不可用时切换仍在本次会话生效。
+
+翻译词典位于 `src/i18n/messages.ts`，英文原文作为键，同一条目提供简体与繁体翻译；动态内容使用命名占位符，数量统一通过 `countLabel` 处理。
+
 ## 本地数据与会话边界
 
 资料库存于当前浏览器配置文件的 `chrome.storage.local`，键为 `tabCoveLibrary`，不读取或覆盖旧项目账号／团队数据。仅在此键不存在时初始化 `Personal` 空间；损坏或未知版本会报错而不会重置。
@@ -44,4 +52,4 @@ pnpm run preview:ui
 
 打开终端打印的本地地址。预览复用实际 UI 和领域服务，浏览器目录使用隔离 fixture，收藏写入该预览 origin 的 localStorage；不会操作用户的真实窗口。预览不能用于证明 Chrome API、后台生命周期、离线扩展或拖拽的端到端正确性。测试文件不会打入生产扩展。
 
-当前 41 条 Node 单元测试通过；类型检查、生产构建、OpenSpec 严格校验通过。生产构建存在单个 JavaScript chunk 超过 500 kB 的提示，不影响产物生成。用户已确认真实 Chrome／Toby 验收清单通过；唯一反馈的插件页面显示差异已修复。详细证据见 [验证记录](openspec/changes/rebuild-local-tab-workspace/validation.md)。
+当前 50 条 Node 单元测试通过；类型检查、生产构建、OpenSpec 严格校验通过。生产构建存在单个 JavaScript chunk 超过 500 kB 的提示，不影响产物生成。用户已确认真实 Chrome／Toby 验收清单通过；唯一反馈的插件页面显示差异已修复。详细证据见 [验证记录](openspec/changes/rebuild-local-tab-workspace/validation.md)。

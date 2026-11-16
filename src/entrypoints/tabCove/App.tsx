@@ -1,5 +1,7 @@
 /** 单机工作台编排：页面只提交领域命令，收藏写入和 Chrome 副作用交给后台。 */
 import { useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
+import type { MessageKey } from '../../i18n/messages.ts';
+import { useI18n, t, count, errorMessage } from '../../i18n/index.ts';
 import { Alert, Button, MantineProvider, Menu } from '@mantine/core';
 import { Notifications, notifications } from '@mantine/notifications';
 import { IconArrowDown, IconArrowUp, IconEdit, IconFolder, IconLayoutSidebarLeftCollapse, IconLayoutSidebarLeftExpand, IconLayoutSidebarRight, IconMinus, IconPlus, IconSearch, IconSettings, IconTrash } from '@tabler/icons-react';
@@ -17,15 +19,16 @@ import { OpenTabs } from './components/OpenTabs';
 import { ChoiceDialog, EditorDialog, type EditorConfig } from './components/Dialogs';
 import { Search, type SearchResult } from './components/Search';
 import { DropZone, MoreMenu, Tool, groupColors, type DragItem } from './components/ui';
+import { LanguageMenu } from './components/LanguageMenu';
 import { AppearanceMenu } from './components/AppearanceMenu';
 import { toMantineTheme, useActiveTheme } from './theme/index.ts';
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
 
 interface ChoiceConfig { key: number; title: string; description: string; left: string; right: string; rightDisabled?: boolean; onChoose(right: boolean, remember: boolean): Promise<void> }
-function errorMessage(error: unknown) { return error instanceof Error ? error.message : 'Something went wrong. Please retry.'; }
 
 function Workspace() {
+  useI18n();
   const state = useWorkspace();
   const { library, snapshot, spaceId } = state;
   const spaceIndex = library?.spaces.findIndex(s => s.id === spaceId) ?? -1; const space = library?.spaces[spaceIndex];
@@ -45,7 +48,7 @@ function Workspace() {
     const refresh = () => { if (!document.hidden) { void useWorkspace.getState().loadLibrary(); void useWorkspace.getState().loadBrowser(); } };
     document.addEventListener('visibilitychange', refresh);
     void state.loadLibrary(); void state.loadBrowser();
-    void browser.windows.getCurrent().then(w => setCurrentWindowId(w.id)).catch(error => notifications.show({ color: 'red', message: errorMessage(error) }));
+    void browser.windows.getCurrent().then(w => setCurrentWindowId(w.id)).catch(error => notifications.show({ closeButtonProps: { 'aria-label': t('Close') }, color: 'red', message: errorMessage(error) }));
     return () => { stop(); browser.storage.onChanged.removeListener(storageChanged); document.removeEventListener('visibilitychange', refresh); };
   }, []);
 
@@ -62,17 +65,17 @@ function Workspace() {
   }, [editor, choice, search, library]);
   useEffect(() => () => clearDrag(), []);
 
-  function run(task: () => Promise<unknown>) { void task().catch(error => notifications.show({ color: 'red', title: 'Could not complete action', message: errorMessage(error), autoClose: false })); }
+  function run(task: () => Promise<unknown>) { void task().catch(error => notifications.show({ closeButtonProps: { 'aria-label': t('Close') }, color: 'red', title: t('Could not complete action'), message: errorMessage(error), autoClose: false })); }
   const mutate = (command: LibraryCommand) => state.mutate(command);
   function form(config: Omit<EditorConfig, 'key'>) { setEditor({ ...config, key: ++dialogId.current }); }
-  function nameForm(title: string, initial: string, submit: (name: string) => Promise<void>) { form({ title, fields: [{ key: 'name', label: 'Name', value: initial }], onSubmit: values => submit(values.name || '') }); }
-  function confirm(title: string, description: string, submit: () => Promise<void>, confirmLabel = 'Delete') { form({ title, description, fields: [], danger: confirmLabel === 'Delete', confirmLabel, onSubmit: submit }); }
+  function nameForm(title: string, initial: string, submit: (name: string) => Promise<void>) { form({ title, fields: [{ key: 'name', label: t('Name'), value: initial }], onSubmit: values => submit(values.name || '') }); }
+  function confirm(title: string, description: string, submit: () => Promise<void>, confirmLabel = t('Delete')) { form({ title, description, fields: [], danger: confirmLabel === t('Delete'), confirmLabel, onSubmit: submit }); }
   async function perform(operation: BrowserOperation) {
     if (operationLock.current) throw new Error('Please wait for the current browser operation.');
     operationLock.current = true; setWorking(true);
     try {
       const result = await browserOperation(operation); setReport(result.failures.length ? result : undefined);
-      if (!result.failures.length && ['save', 'open'].includes(operation.type)) notifications.show({ message: result.message });
+      if (!result.failures.length && ['save', 'open'].includes(operation.type)) notifications.show({ closeButtonProps: { 'aria-label': t('Close') }, message: result.message });
     } finally { operationLock.current = false; setWorking(false); await Promise.all([state.loadLibrary(), state.loadBrowser()]); }
   }
   function windowTarget(): OpenTarget { if (currentWindowId === undefined) throw new Error('The current browser window is not available. Refresh this workspace.'); return { windowId: currentWindowId }; }
@@ -84,15 +87,15 @@ function Workspace() {
     const submit = (close: boolean, remember: boolean) => perform({ type: 'save', preview, target, disposition: close ? 'close' : 'keep', remember });
     const preference = library!.preferences.saveDisposition;
     if (preference !== 'ask') { await submit(preference === 'close', false); return; }
-    setChoice({ key: ++dialogId.current, title: 'Save session?', description: `Save ${preview.tabs.length} ${preview.tabs.length === 1 ? 'tab' : 'tabs'} into ${label}? You can reopen them anytime.`, left: 'Save & Keep Tabs Open', right: 'Save & Close Tabs', onChoose: submit });
+    setChoice({ key: ++dialogId.current, title: t('Save session?'), description: t('Save {tabs} into {name}? You can reopen them anytime.', { tabs: count('tabs', preview.tabs.length), name: label }), left: t('Save & Keep Tabs Open'), right: t('Save & Close Tabs'), onChoose: submit });
   }
   function openCollection(collection: Collection) {
-    if (currentWindowId === undefined) { notifications.show({ color: 'red', message: 'The current browser window is unavailable. Refresh this workspace.' }); return; }
+    if (currentWindowId === undefined) { notifications.show({ closeButtonProps: { 'aria-label': t('Close') }, color: 'red', message: t('The current browser window is unavailable. Refresh this workspace.') }); return; }
     const target: OpenTarget = { windowId: currentWindowId };
     const submit = (group: boolean, remember: boolean) => perform({ type: 'open', items: collection.tabs, target, ...(group ? { group: { title: collection.name, color: collection.groupColor || 'grey' } } : {}), ...(remember ? { remember: group ? 'group' as const : 'tabs' as const } : {}) });
     const mode = library!.preferences.restoreMode;
     if (mode !== 'ask') { run(() => submit(mode === 'group', false)); return; }
-    setChoice({ key: ++dialogId.current, title: 'Open collection?', description: `Open ${collection.tabs.length} tabs from ${collection.name}${snapshot?.groupsAvailable === false ? '? Tab groups are currently unavailable.' : ' as a Chrome tab group?'}`, left: 'Open Tabs', right: 'Open as Group', rightDisabled: snapshot?.groupsAvailable === false, onChoose: submit });
+    setChoice({ key: ++dialogId.current, title: t('Open collection?'), description: t(snapshot?.groupsAvailable === false ? 'Open {tabs} from {name}? Tab groups are currently unavailable.' : 'Open {tabs} from {name} as a Chrome tab group?', { tabs: count('tabs', collection.tabs.length), name: collection.name }), left: t('Open Tabs'), right: t('Open as Group'), rightDisabled: snapshot?.groupsAvailable === false, onChoose: submit });
   }
   function openTab(tab: SavedTab) { run(() => perform({ type: 'open', items: [tab], target: windowTarget(), activate: true })); }
   function startDrag(event: DragEvent, item: DragItem) {
@@ -112,7 +115,7 @@ function Workspace() {
   function dropGap(beforeId?: string) {
     const item = takeDrag(); if (!item || !space) return;
     if (item.kind === 'collection') { run(() => mutate({ type: 'collection:move', id: item.id, spaceId: space.id, beforeId })); return; }
-    nameForm('New collection', '', async name => {
+    nameForm(t('New collection'), '', async name => {
       if (item.kind === 'tab') await mutate({ type: 'tab:newCollection', id: item.id, spaceId: space.id, name, beforeId });
       else if (item.kind === 'live') { const tab = getLiveTab(item.id); await save({ windowId: tab.windowId, tabId: tab.id }, { spaceId: space.id, name, beforeId }); }
     });
@@ -135,11 +138,11 @@ function Workspace() {
     function step() { const target = scrollTarget.current; if (!target || !dragRef.current) { scrollFrame.current = undefined; return; } target.element.scrollTop += target.speed; scrollFrame.current = requestAnimationFrame(step); }
     scrollFrame.current = requestAnimationFrame(step);
   }
-  function settings() { if (!library) return; form({ title: 'Preferences', description: 'Your library stays in this browser. Removing the extension or clearing its data deletes the library.', fields: [
-    { key: 'save', label: 'After saving tabs', value: library.preferences.saveDisposition, options: [{ value: 'ask', label: 'Ask every time' }, { value: 'keep', label: 'Keep tabs open' }, { value: 'close', label: 'Close saved tabs' }] },
-    { key: 'restore', label: 'When opening collections', value: library.preferences.restoreMode, options: [{ value: 'ask', label: 'Ask every time' }, { value: 'tabs', label: 'Open ordinary tabs' }, { value: 'group', label: 'Open as a Chrome group' }] },
+  function settings() { if (!library) return; form({ title: t('Preferences'), description: t('Your library stays in this browser. Removing the extension or clearing its data deletes the library.'), fields: [
+    { key: 'save', label: t('After saving tabs'), value: library.preferences.saveDisposition, options: [{ value: 'ask', label: t('Ask every time') }, { value: 'keep', label: t('Keep tabs open') }, { value: 'close', label: t('Close saved tabs') }] },
+    { key: 'restore', label: t('When opening collections'), value: library.preferences.restoreMode, options: [{ value: 'ask', label: t('Ask every time') }, { value: 'tabs', label: t('Open ordinary tabs') }, { value: 'group', label: t('Open as a Chrome group') }] },
   ], onSubmit: v => mutate({ type: 'preferences', patch: { saveDisposition: v.save as 'ask' | 'keep' | 'close', restoreMode: v.restore as 'ask' | 'tabs' | 'group' } }) }); }
-  function newSpace() { nameForm('Create space', '', async name => { await mutate({ type: 'space:create', name }); const spaces = useWorkspace.getState().library?.spaces; if (spaces?.length) state.selectSpace(spaces[spaces.length - 1]!.id); }); }
+  function newSpace() { nameForm(t('Create space'), '', async name => { await mutate({ type: 'space:create', name }); const spaces = useWorkspace.getState().library?.spaces; if (spaces?.length) state.selectSpace(spaces[spaces.length - 1]!.id); }); }
   function jump(result: SearchResult) { if (!result.spaceId) return; state.selectSpace(result.spaceId); setSearch(false); if (result.collectionId) { setCollapsed(prev => { const next = new Set(prev); next.delete(result.collectionId!); return next; }); requestAnimationFrame(() => document.getElementById(`collection-${result.collectionId}`)?.scrollIntoView({ block: 'center', behavior: 'smooth' })); } }
   function searchOpen(result: SearchResult) {
     setSearch(false);
@@ -149,70 +152,71 @@ function Workspace() {
     else run(() => perform({ type: 'focus', tabId: result.tabId! }));
   }
   const boardActions: BoardActions = {
-    create: beforeId => nameForm('New collection', '', name => mutate({ type: 'collection:create', spaceId: space!.id, name, beforeId })),
-    rename: c => nameForm('Rename collection', c.name, name => mutate({ type: 'collection:rename', id: c.id, name })),
-    remove: c => confirm('Delete collection?', `Delete ${c.name} and its ${c.tabs.length} saved tabs? Open browser tabs will stay open.`, () => mutate({ type: 'collection:delete', id: c.id })),
+    create: beforeId => nameForm(t('New collection'), '', name => mutate({ type: 'collection:create', spaceId: space!.id, name, beforeId })),
+    rename: c => nameForm(t('Rename collection'), c.name, name => mutate({ type: 'collection:rename', id: c.id, name })),
+    remove: c => confirm(t('Delete collection?'), t('Delete {name} and its {tabs}? Open browser tabs will stay open.', { name: c.name, tabs: count('tabs', c.tabs.length) }), () => mutate({ type: 'collection:delete', id: c.id })),
     open: openCollection,
     save: c => run(() => save({ windowId: windowTarget().windowId }, { collectionId: c.id })),
-    move: c => form({ title: 'Move collection', fields: [{ key: 'space', label: 'Destination space', value: space!.id, options: library!.spaces.map(s => ({ value: s.id, label: s.name })) }], onSubmit: v => mutate({ type: 'collection:move', id: c.id, spaceId: v.space! }) }),
+    move: c => form({ title: t('Move collection'), fields: [{ key: 'space', label: t('Destination space'), value: space!.id, options: library!.spaces.map(s => ({ value: s.id, label: s.name })) }], onSubmit: v => mutate({ type: 'collection:move', id: c.id, spaceId: v.space! }) }),
     reorder: (c, beforeId) => run(() => mutate({ type: 'collection:move', id: c.id, spaceId: space!.id, beforeId })),
-    editTab: tab => form({ title: 'Edit tab', fields: [{ key: 'title', label: 'Title', value: tab.title }, { key: 'url', label: 'URL', value: tab.url }], onSubmit: v => mutate({ type: 'tab:edit', id: tab.id, title: v.title!, url: v.url! }) }),
+    editTab: tab => form({ title: t('Edit tab'), fields: [{ key: 'title', label: t('Title'), value: tab.title }, { key: 'url', label: t('URL'), value: tab.url }], onSubmit: v => mutate({ type: 'tab:edit', id: tab.id, title: v.title!, url: v.url! }) }),
     removeTab: tab => run(() => mutate({ type: 'tab:delete', id: tab.id })),
     openTab,
-    moveTab: tab => form({ title: 'Move tab', fields: [{ key: 'collection', label: 'Destination collection', value: library!.spaces.flatMap(s => s.collections).find(c => c.tabs.some(t => t.id === tab.id))!.id, options: library!.spaces.flatMap(s => s.collections.map(c => ({ value: c.id, label: `${s.name} / ${c.name}` }))) }], onSubmit: v => mutate({ type: 'tab:move', id: tab.id, collectionId: v.collection! }) }),
+    moveTab: tab => form({ title: t('Move tab'), fields: [{ key: 'collection', label: t('Destination collection'), value: library!.spaces.flatMap(s => s.collections).find(c => c.tabs.some(t => t.id === tab.id))!.id, options: library!.spaces.flatMap(s => s.collections.map(c => ({ value: c.id, label: `${s.name} / ${c.name}` }))) }], onSubmit: v => mutate({ type: 'tab:move', id: tab.id, collectionId: v.collection! }) }),
     reorderTab: (tab, collectionId, beforeId) => run(() => mutate({ type: 'tab:move', id: tab.id, collectionId, beforeId })),
-    newCollectionFromTab: tab => nameForm('Move to new collection', '', name => mutate({ type: 'tab:newCollection', id: tab.id, spaceId: space!.id, name })),
+    newCollectionFromTab: tab => nameForm(t('Move to new collection'), '', name => mutate({ type: 'tab:newCollection', id: tab.id, spaceId: space!.id, name })),
     mergeCollection: collection => {
       const targets = library!.spaces.flatMap(s => s.collections.filter(c => c.id !== collection.id).map(c => ({ value: c.id, label: `${s.name} / ${c.name}` })));
-      if (!targets.length) { notifications.show({ message: 'Create another collection to merge into.' }); return; }
-      form({ title: 'Merge collections?', description: 'All source tabs will be appended to the destination. The source collection will be removed.', fields: [{ key: 'target', label: 'Destination collection', value: targets[0]!.value, options: targets }], confirmLabel: 'Merge', onSubmit: v => mutate({ type: 'collection:merge', id: collection.id, targetId: v.target! }) });
+      if (!targets.length) { notifications.show({ closeButtonProps: { 'aria-label': t('Close') }, message: t('Create another collection to merge into.') }); return; }
+      form({ title: t('Merge collections?'), description: t('All source tabs will be appended to the destination. The source collection will be removed.'), fields: [{ key: 'target', label: t('Destination collection'), value: targets[0]!.value, options: targets }], confirmLabel: t('Merge'), onSubmit: v => mutate({ type: 'collection:merge', id: collection.id, targetId: v.target! }) });
     },
     startDrag, dropCollection, dropGap,
-    merge: targetId => { const item = takeDrag(); if (item?.kind !== 'collection') return; const target = findCollection(library!, targetId).collection; confirm('Merge collections?', `Move all tabs into ${target.name} and remove the source collection?`, () => mutate({ type: 'collection:merge', id: item.id, targetId }), 'Merge'); },
+    merge: targetId => { const item = takeDrag(); if (item?.kind !== 'collection') return; const target = findCollection(library!, targetId).collection; confirm(t('Merge collections?'), t('Move all tabs into {name} and remove the source collection?', { name: target.name }), () => mutate({ type: 'collection:merge', id: item.id, targetId }), t('Merge')); },
   };
 
   return <div className={`workspace ${sidebarCollapsed ? 'sidebar-rail' : ''} ${!rightbar ? 'rightbar-hidden' : ''} ${drag ? 'is-dragging' : ''}`} onDragOver={autoScroll} onDrop={event => { if (!event.defaultPrevented) clearDrag(); }}>
     <aside className="sidebar">
       <div className="brand"><span className="brand-mark" aria-hidden="true"><svg viewBox="0 0 128 128"><path d="M88 40A34 34 0 1 0 88 88" /><rect x="49" y="51" width="30" height="26" rx="8" /></svg></span><strong className="label">Tab Cove</strong></div>
-      <button className="search-trigger" title="Search (/)" disabled={!library} onClick={() => setSearch(true)}><IconSearch size={16} /><span className="label">Search</span><kbd>/</kbd></button>
-      <div className="spaces-heading"><span className="label">Spaces</span></div>
-      <nav className="spaces-list" aria-label="Spaces" data-scroll-panel>
+      <button className="search-trigger" title={t('Search (/)')} disabled={!library} onClick={() => setSearch(true)}><IconSearch size={16} /><span className="label">{t('Search')}</span><kbd>/</kbd></button>
+      <div className="spaces-heading"><span className="label">{t('Spaces')}</span></div>
+      <nav className="spaces-list" aria-label={t('Spaces')} data-scroll-panel>
         {library?.spaces.map((s, si) => <div key={s.id}>
-          {drag?.kind === 'space' && drag.id !== s.id && <DropZone active label="Move space here" className="space-gap" onDrop={() => { const item = takeDrag(); if (item?.kind === 'space') run(() => mutate({ type: 'space:move', id: item.id, beforeId: s.id })); }} />}
-          <DropZone active={drag?.kind === 'collection'} label={`Move collection to ${s.name}`} onDrop={() => { const item = takeDrag(); if (item?.kind === 'collection') run(() => mutate({ type: 'collection:move', id: item.id, spaceId: s.id })); }} className="space-drop">
+          {drag?.kind === 'space' && drag.id !== s.id && <DropZone active label={t('Move space here')} className="space-gap" onDrop={() => { const item = takeDrag(); if (item?.kind === 'space') run(() => mutate({ type: 'space:move', id: item.id, beforeId: s.id })); }} />}
+          <DropZone active={drag?.kind === 'collection'} label={t('Move collection to {name}', { name: s.name })} onDrop={() => { const item = takeDrag(); if (item?.kind === 'collection') run(() => mutate({ type: 'collection:move', id: item.id, spaceId: s.id })); }} className="space-drop">
             <div className={`space-item ${s.id === spaceId ? 'selected' : ''}`} draggable onDragStart={e => startDrag(e, { kind: 'space', id: s.id })}>
               <button className="space-select" title={s.name} aria-current={s.id === spaceId ? 'page' : undefined} onClick={() => state.selectSpace(s.id)}><span className={`space-initial color-${si % 5}`}>{s.name.slice(0, 1).toUpperCase()}</span><span className="label">{s.name}</span></button>
-              <MoreMenu label={`Options for space ${s.name}`}>
-                <Menu.Item leftSection={<IconEdit size={15} />} onClick={() => nameForm('Rename space', s.name, name => mutate({ type: 'space:rename', id: s.id, name }))}>Rename</Menu.Item>
-                <Menu.Item disabled={si === 0} leftSection={<IconArrowUp size={15} />} onClick={() => run(() => mutate({ type: 'space:move', id: s.id, beforeId: library.spaces[si - 1]?.id }))}>Move up</Menu.Item>
-                <Menu.Item disabled={si === library.spaces.length - 1} leftSection={<IconArrowDown size={15} />} onClick={() => run(() => mutate({ type: 'space:move', id: s.id, beforeId: library.spaces[si + 2]?.id }))}>Move down</Menu.Item>
-                <Menu.Divider /><Menu.Item color="red" leftSection={<IconTrash size={15} />} onClick={() => confirm('Delete space?', `Delete ${s.name}, ${s.collections.length} collections and ${s.collections.reduce((n, c) => n + c.tabs.length, 0)} saved tabs?`, () => mutate({ type: 'space:delete', id: s.id }))}>Delete space</Menu.Item>
+              <MoreMenu label={t('Options for space {name}', { name: s.name })}>
+                <Menu.Item leftSection={<IconEdit size={15} />} onClick={() => nameForm(t('Rename space'), s.name, name => mutate({ type: 'space:rename', id: s.id, name }))}>{t('Rename')}</Menu.Item>
+                <Menu.Item disabled={si === 0} leftSection={<IconArrowUp size={15} />} onClick={() => run(() => mutate({ type: 'space:move', id: s.id, beforeId: library.spaces[si - 1]?.id }))}>{t('Move up')}</Menu.Item>
+                <Menu.Item disabled={si === library.spaces.length - 1} leftSection={<IconArrowDown size={15} />} onClick={() => run(() => mutate({ type: 'space:move', id: s.id, beforeId: library.spaces[si + 2]?.id }))}>{t('Move down')}</Menu.Item>
+                <Menu.Divider /><Menu.Item color="red" leftSection={<IconTrash size={15} />} onClick={() => confirm(t('Delete space?'), t('Delete {name}, {collections} and {tabs}?', { name: s.name, collections: count('collections', s.collections.length), tabs: count('tabs', s.collections.reduce((n, c) => n + c.tabs.length, 0)) }), () => mutate({ type: 'space:delete', id: s.id }))}>{t('Delete space')}</Menu.Item>
               </MoreMenu>
             </div>
           </DropZone>
         </div>)}
-        <button className="create-space" title="Create Space" onClick={newSpace} disabled={!library || !!state.libraryError}><IconPlus size={18} /><span className="label">Create Space</span></button>
+        <button className="create-space" title={t('Create Space')} onClick={newSpace} disabled={!library || !!state.libraryError}><IconPlus size={18} /><span className="label">{t('Create Space')}</span></button>
       </nav>
       <footer className="sidebar-footer">
         <AppearanceMenu />
-        <button title="Settings" onClick={settings} disabled={!library}><IconSettings size={18} /><span className="label">Settings</span></button>
-        <button title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'} aria-expanded={!sidebarCollapsed} onClick={() => updateUi({ sidebarCollapsed: !sidebarCollapsed })}>{sidebarCollapsed ? <IconLayoutSidebarLeftExpand size={18} /> : <IconLayoutSidebarLeftCollapse size={18} />}<span className="label">Collapse</span></button>
-        <div className="local-status"><span />Saved on this device</div>
+        <LanguageMenu />
+        <button title={t('Settings')} onClick={settings} disabled={!library}><IconSettings size={18} /><span className="label">{t('Settings')}</span></button>
+        <button title={sidebarCollapsed ? t('Expand sidebar') : t('Collapse sidebar')} aria-expanded={!sidebarCollapsed} onClick={() => updateUi({ sidebarCollapsed: !sidebarCollapsed })}>{sidebarCollapsed ? <IconLayoutSidebarLeftExpand size={18} /> : <IconLayoutSidebarLeftCollapse size={18} />}<span className="label">{t('Collapse')}</span></button>
+        <div className="local-status"><span />{t('Saved on this device')}</div>
       </footer>
     </aside>
     <main className="main-panel" data-scroll-panel aria-busy={busy}>
-      <div className="panel-toggles"><Tool label={rightbar ? 'Hide open tabs' : 'Show open tabs'} onClick={() => setRightbar(!rightbar)}><IconLayoutSidebarRight size={18} /></Tool></div>
-      {state.libraryError && <Alert color="red" title="Could not load your library" m="lg"><p>{state.libraryError}</p><Button variant="outline" size="xs" onClick={() => void state.loadLibrary()}>Retry</Button></Alert>}
-      {report && <Alert className="operation-report" color="orange" title={report.message} withCloseButton onClose={() => setReport(undefined)}><ul>{report.failures.map((f, i) => <li key={i}>{f}</li>)}</ul>{report.retry && <Button size="xs" variant="outline" onClick={() => run(() => perform(report.retry!))} disabled={busy}>Retry failed steps</Button>}</Alert>}
-      {!library && !state.libraryError && <div className="empty-state"><div className="loader" /><p>Opening your library…</p></div>}
-      {library && !space && <div className="empty-state board-empty"><IconFolder size={42} stroke={1.2} /><h2>Make room for your next idea</h2><p>Create a space to start organizing your tabs.</p><button className="primary-button" onClick={newSpace}>Create Space</button></div>}
+      <div className="panel-toggles"><Tool label={rightbar ? t('Hide open tabs') : t('Show open tabs')} onClick={() => setRightbar(!rightbar)}><IconLayoutSidebarRight size={18} /></Tool></div>
+      {state.libraryError && <Alert color="red" title={t('Could not load your library')} m="lg"><p>{errorMessage(state.libraryError)}</p><Button variant="outline" size="xs" onClick={() => void state.loadLibrary()}>{t('Retry')}</Button></Alert>}
+      {report && <Alert className="operation-report" color="orange" title={report.message} withCloseButton closeButtonLabel={t('Close')} onClose={() => setReport(undefined)}><ul>{report.failures.map((f, i) => <li key={i}>{f}</li>)}</ul>{report.retry && <Button size="xs" variant="outline" onClick={() => run(() => perform(report.retry!))} disabled={busy}>{t('Retry failed steps')}</Button>}</Alert>}
+      {!library && !state.libraryError && <div className="empty-state"><div className="loader" /><p>{t('Opening your library…')}</p></div>}
+      {library && !space && <div className="empty-state board-empty"><IconFolder size={42} stroke={1.2} /><h2>{t('Make room for your next idea')}</h2><p>{t('Create a space to start organizing your tabs.')}</p><button className="primary-button" onClick={newSpace}>{t('Create Space')}</button></div>}
       {space && <fieldset className="workspace-fieldset" disabled={busy || !!state.libraryError}>
-        <header className="space-header"><div className="space-title"><span className={`space-symbol color-${spaceIndex % 5}`}>{space.name.slice(0, 1).toUpperCase()}</span><h1>{space.name}</h1><span className="space-stats">{space.collections.length} Collections <span>·</span> {space.collections.reduce((n, c) => n + c.tabs.length, 0)} tabs</span></div></header>
-        <div className="board-toolbar"><div className="toolbar-left"><span className="order-label"><IconArrowDown size={15} />Custom order</span><span className="toolbar-divider" /><Tool label="Expand all collections" onClick={() => setCollapsed(new Set())}><IconPlus size={19} /></Tool><Tool label="Collapse all collections" onClick={() => setCollapsed(new Set(space.collections.map(c => c.id)))}><IconMinus size={19} /></Tool></div><button className="primary-button" onClick={() => boardActions.create()}><IconPlus size={18} />New Collection</button></div>
-        {library?.preferences.saveDisposition !== 'ask' && <div className="preference-note">Saving tabs will {library?.preferences.saveDisposition === 'close' ? 'close them after they are saved' : 'keep them open'}. <button className="text-button" onClick={settings}>Change</button></div>}
+        <header className="space-header"><div className="space-title"><span className={`space-symbol color-${spaceIndex % 5}`}>{space.name.slice(0, 1).toUpperCase()}</span><h1>{space.name}</h1><span className="space-stats">{count('collections', space.collections.length)} <span>·</span> {count('tabs', space.collections.reduce((n, c) => n + c.tabs.length, 0))}</span></div></header>
+        <div className="board-toolbar"><div className="toolbar-left"><span className="order-label"><IconArrowDown size={15} />{t('Custom order')}</span><span className="toolbar-divider" /><Tool label={t('Expand all collections')} onClick={() => setCollapsed(new Set())}><IconPlus size={19} /></Tool><Tool label={t('Collapse all collections')} onClick={() => setCollapsed(new Set(space.collections.map(c => c.id)))}><IconMinus size={19} /></Tool></div><button className="primary-button" onClick={() => boardActions.create()}><IconPlus size={18} />{t('New Collection')}</button></div>
+        {library?.preferences.saveDisposition !== 'ask' && <div className="preference-note">{t(library?.preferences.saveDisposition === 'close' ? 'Saved tabs will be closed after saving.' : 'Saved tabs will stay open.')} <button className="text-button" onClick={settings}>{t('Change')}</button></div>}
         <Board space={space} collapsed={collapsed} toggle={id => setCollapsed(prev => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; })} drag={drag} actions={boardActions} />
       </fieldset>}
-      {busy && <div className="busy-status" role="status">Saving changes…</div>}
+      {busy && <div className="busy-status" role="status">{t('Saving changes…')}</div>}
     </main>
     <aside className="open-panel" data-scroll-panel><fieldset className="workspace-fieldset" disabled={busy}>
       <OpenTabs snapshot={snapshot} currentWindowId={currentWindowId} error={state.browserError} refresh={() => void state.loadBrowser()} drag={drag} actions={{
@@ -220,10 +224,10 @@ function Workspace() {
         move: (tab, target) => {
           if (target) { run(() => perform({ type: 'move', tabId: tab.id, target })); return; }
           const destinations = (snapshot?.windows || []).flatMap((w, wi) => [
-            { value: `window-${w.id}`, label: `${w.id === currentWindowId ? 'This window' : `Window ${wi + 1}`} / No group`, target: { windowId: w.id } as OpenTarget },
-            ...w.groups.map(g => ({ value: `group-${g.id}`, label: `Window ${wi + 1} / ${g.title || 'Unnamed group'}`, target: { windowId: w.id, groupId: g.id } as OpenTarget })),
+            { value: `window-${w.id}`, label: `${w.id === currentWindowId ? t('This window') : t('Window {number}', { number: wi + 1 })} / ${t('No group')}`, target: { windowId: w.id } as OpenTarget },
+            ...w.groups.map(g => ({ value: `group-${g.id}`, label: `${t('Window {number}', { number: wi + 1 })} / ${g.title || t('Unnamed group')}`, target: { windowId: w.id, groupId: g.id } as OpenTarget })),
           ]);
-          form({ title: 'Move browser tab', fields: [{ key: 'target', label: 'Destination', value: `window-${tab.windowId}`, options: destinations }], onSubmit: async v => {
+          form({ title: t('Move browser tab'), fields: [{ key: 'target', label: t('Destination'), value: `window-${tab.windowId}`, options: destinations }], onSubmit: async v => {
             const destination = destinations.find(d => d.value === v.target);
             if (!destination) throw new Error('Choose a destination.');
             await perform({ type: 'move', tabId: tab.id, target: destination.target });
@@ -232,7 +236,7 @@ function Workspace() {
         save: source => run(() => save(source)), focus: tab => run(() => perform({ type: 'focus', tabId: tab.id })), close: tab => run(() => perform({ type: 'close', tabId: tab.id })),
         collapse: group => run(() => perform({ type: 'editGroup', groupId: group.id, collapsed: !group.collapsed })),
         ungroup: group => run(() => perform({ type: 'ungroup', groupId: group.id })),
-        editGroup: group => form({ title: 'Edit tab group', fields: [{ key: 'name', label: 'Group name', value: group.title, optional: true }, { key: 'color', label: 'Color', value: group.color, options: Object.keys(groupColors).map(color => ({ value: color, label: color.charAt(0).toUpperCase() + color.slice(1) })) }], onSubmit: v => perform({ type: 'editGroup', groupId: group.id, title: v.name, color: v.color as keyof typeof groupColors }) }),
+        editGroup: group => form({ title: t('Edit tab group'), fields: [{ key: 'name', label: t('Group name'), value: group.title, optional: true }, { key: 'color', label: t('Color'), value: group.color, options: Object.keys(groupColors).map(color => ({ value: color, label: t((color.charAt(0).toUpperCase() + color.slice(1)) as MessageKey) })) }], onSubmit: v => perform({ type: 'editGroup', groupId: group.id, title: v.name, color: v.color as keyof typeof groupColors }) }),
       }} />
     </fieldset></aside>
     {editor && <EditorDialog key={editor.key} config={editor} onClose={() => setEditor(undefined)} />}
