@@ -1,10 +1,11 @@
 /** 单机工作台编排：页面只提交领域命令，收藏写入和 Chrome 副作用交给后台。 */
-import { useEffect, useRef, useState, type DragEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
 import { Alert, Button, MantineProvider, Menu } from '@mantine/core';
 import { Notifications, notifications } from '@mantine/notifications';
-import { IconArrowDown, IconArrowUp, IconEdit, IconFolder, IconLayoutSidebar, IconLayoutSidebarRight, IconMinus, IconPlus, IconSearch, IconSettings, IconTrash } from '@tabler/icons-react';
+import { IconArrowDown, IconArrowUp, IconEdit, IconFolder, IconLayoutSidebarLeftCollapse, IconLayoutSidebarLeftExpand, IconLayoutSidebarRight, IconMinus, IconPlus, IconSearch, IconSettings, IconTrash } from '@tabler/icons-react';
 import { browser } from 'wxt/browser';
 import { useWorkspace } from '../../store/workspace.ts';
+import { useUiPreferences } from '../../store/uiPreferences.ts';
 import { browserOperation, getSavePreview } from '../../services/core.ts';
 import { findCollection } from '../../services/libraryModel.ts';
 import { LIBRARY_KEY } from '../../utils/storage/index.ts';
@@ -16,6 +17,8 @@ import { OpenTabs } from './components/OpenTabs';
 import { ChoiceDialog, EditorDialog, type EditorConfig } from './components/Dialogs';
 import { Search, type SearchResult } from './components/Search';
 import { DropZone, MoreMenu, Tool, groupColors, type DragItem } from './components/ui';
+import { AppearanceMenu } from './components/AppearanceMenu';
+import { toMantineTheme, useActiveTheme } from './theme/index.ts';
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
 
@@ -25,12 +28,12 @@ function errorMessage(error: unknown) { return error instanceof Error ? error.me
 function Workspace() {
   const state = useWorkspace();
   const { library, snapshot, spaceId } = state;
-  const space = library?.spaces.find(s => s.id === spaceId);
+  const spaceIndex = library?.spaces.findIndex(s => s.id === spaceId) ?? -1; const space = library?.spaces[spaceIndex];
   const [editor, setEditor] = useState<EditorConfig>(); const [choice, setChoice] = useState<ChoiceConfig>();
   const [search, setSearch] = useState(false); const [collapsed, setCollapsed] = useState(new Set<string>());
   const [drag, setDrag] = useState<DragItem>(); const [report, setReport] = useState<OperationReport>();
   const [working, setWorking] = useState(false); const [currentWindowId, setCurrentWindowId] = useState<number>();
-  const [sidebar, setSidebar] = useState(() => window.innerWidth > 960); const [rightbar, setRightbar] = useState(true);
+  const sidebarCollapsed = useUiPreferences(s => s.sidebarCollapsed); const updateUi = useUiPreferences(s => s.update); const [rightbar, setRightbar] = useState(true);
   const operationLock = useRef(false); const dialogId = useRef(0); const dragRef = useRef<DragItem | undefined>(undefined);
   const scrollFrame = useRef<number | undefined>(undefined); const scrollTarget = useRef<{ element: HTMLElement; speed: number } | undefined>(undefined);
   const busy = working || state.pending;
@@ -69,7 +72,7 @@ function Workspace() {
     operationLock.current = true; setWorking(true);
     try {
       const result = await browserOperation(operation); setReport(result.failures.length ? result : undefined);
-      if (!result.failures.length && ['save', 'open'].includes(operation.type)) notifications.show({ message: result.message, color: 'pink' });
+      if (!result.failures.length && ['save', 'open'].includes(operation.type)) notifications.show({ message: result.message });
     } finally { operationLock.current = false; setWorking(false); await Promise.all([state.loadLibrary(), state.loadBrowser()]); }
   }
   function windowTarget(): OpenTarget { if (currentWindowId === undefined) throw new Error('The current browser window is not available. Refresh this workspace.'); return { windowId: currentWindowId }; }
@@ -168,17 +171,17 @@ function Workspace() {
     merge: targetId => { const item = takeDrag(); if (item?.kind !== 'collection') return; const target = findCollection(library!, targetId).collection; confirm('Merge collections?', `Move all tabs into ${target.name} and remove the source collection?`, () => mutate({ type: 'collection:merge', id: item.id, targetId }), 'Merge'); },
   };
 
-  return <div className={`workspace ${!sidebar ? 'sidebar-hidden' : ''} ${!rightbar ? 'rightbar-hidden' : ''} ${drag ? 'is-dragging' : ''}`} onDragOver={autoScroll} onDrop={event => { if (!event.defaultPrevented) clearDrag(); }}>
+  return <div className={`workspace ${sidebarCollapsed ? 'sidebar-rail' : ''} ${!rightbar ? 'rightbar-hidden' : ''} ${drag ? 'is-dragging' : ''}`} onDragOver={autoScroll} onDrop={event => { if (!event.defaultPrevented) clearDrag(); }}>
     <aside className="sidebar">
-      <div className="brand"><span className="brand-mark" aria-hidden="true"><span /></span><strong>Tab Cove</strong></div>
-      <button className="search-trigger" disabled={!library} onClick={() => setSearch(true)}><IconSearch size={19} /><span>Search</span><kbd>/</kbd></button>
-      <div className="spaces-heading">Spaces</div>
+      <div className="brand"><span className="brand-mark" aria-hidden="true"><span /></span><strong className="label">Tab Cove</strong></div>
+      <button className="search-trigger" title="Search (/)" disabled={!library} onClick={() => setSearch(true)}><IconSearch size={16} /><span className="label">Search</span><kbd>/</kbd></button>
+      <div className="spaces-heading"><span className="label">Spaces</span></div>
       <nav className="spaces-list" aria-label="Spaces" data-scroll-panel>
         {library?.spaces.map((s, si) => <div key={s.id}>
           {drag?.kind === 'space' && drag.id !== s.id && <DropZone active label="Move space here" className="space-gap" onDrop={() => { const item = takeDrag(); if (item?.kind === 'space') run(() => mutate({ type: 'space:move', id: item.id, beforeId: s.id })); }} />}
           <DropZone active={drag?.kind === 'collection'} label={`Move collection to ${s.name}`} onDrop={() => { const item = takeDrag(); if (item?.kind === 'collection') run(() => mutate({ type: 'collection:move', id: item.id, spaceId: s.id })); }} className="space-drop">
             <div className={`space-item ${s.id === spaceId ? 'selected' : ''}`} draggable onDragStart={e => startDrag(e, { kind: 'space', id: s.id })}>
-              <button className="space-select" aria-current={s.id === spaceId ? 'page' : undefined} onClick={() => state.selectSpace(s.id)}><span className={`space-initial color-${si % 5}`}>{s.name.slice(0, 1).toUpperCase()}</span><span>{s.name}</span></button>
+              <button className="space-select" title={s.name} aria-current={s.id === spaceId ? 'page' : undefined} onClick={() => state.selectSpace(s.id)}><span className={`space-initial color-${si % 5}`}>{s.name.slice(0, 1).toUpperCase()}</span><span className="label">{s.name}</span></button>
               <MoreMenu label={`Options for space ${s.name}`}>
                 <Menu.Item leftSection={<IconEdit size={15} />} onClick={() => nameForm('Rename space', s.name, name => mutate({ type: 'space:rename', id: s.id, name }))}>Rename</Menu.Item>
                 <Menu.Item disabled={si === 0} leftSection={<IconArrowUp size={15} />} onClick={() => run(() => mutate({ type: 'space:move', id: s.id, beforeId: library.spaces[si - 1]?.id }))}>Move up</Menu.Item>
@@ -188,18 +191,23 @@ function Workspace() {
             </div>
           </DropZone>
         </div>)}
-        <button className="create-space" onClick={newSpace} disabled={!library || !!state.libraryError}><IconPlus size={20} />Create Space</button>
+        <button className="create-space" title="Create Space" onClick={newSpace} disabled={!library || !!state.libraryError}><IconPlus size={18} /><span className="label">Create Space</span></button>
       </nav>
-      <footer className="sidebar-footer"><button onClick={settings} disabled={!library}><IconSettings size={19} />Settings</button><div className="local-status"><span />Saved on this device</div></footer>
+      <footer className="sidebar-footer">
+        <AppearanceMenu />
+        <button title="Settings" onClick={settings} disabled={!library}><IconSettings size={18} /><span className="label">Settings</span></button>
+        <button title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'} aria-expanded={!sidebarCollapsed} onClick={() => updateUi({ sidebarCollapsed: !sidebarCollapsed })}>{sidebarCollapsed ? <IconLayoutSidebarLeftExpand size={18} /> : <IconLayoutSidebarLeftCollapse size={18} />}<span className="label">Collapse</span></button>
+        <div className="local-status"><span />Saved on this device</div>
+      </footer>
     </aside>
     <main className="main-panel" data-scroll-panel aria-busy={busy}>
-      <div className="panel-toggles"><Tool label={sidebar ? 'Hide spaces' : 'Show spaces'} onClick={() => setSidebar(!sidebar)}><IconLayoutSidebar size={18} /></Tool><Tool label={rightbar ? 'Hide open tabs' : 'Show open tabs'} onClick={() => setRightbar(!rightbar)}><IconLayoutSidebarRight size={18} /></Tool></div>
+      <div className="panel-toggles"><Tool label={rightbar ? 'Hide open tabs' : 'Show open tabs'} onClick={() => setRightbar(!rightbar)}><IconLayoutSidebarRight size={18} /></Tool></div>
       {state.libraryError && <Alert color="red" title="Could not load your library" m="lg"><p>{state.libraryError}</p><Button variant="outline" size="xs" onClick={() => void state.loadLibrary()}>Retry</Button></Alert>}
       {report && <Alert className="operation-report" color="orange" title={report.message} withCloseButton onClose={() => setReport(undefined)}><ul>{report.failures.map((f, i) => <li key={i}>{f}</li>)}</ul>{report.retry && <Button size="xs" variant="outline" onClick={() => run(() => perform(report.retry!))} disabled={busy}>Retry failed steps</Button>}</Alert>}
       {!library && !state.libraryError && <div className="empty-state"><div className="loader" /><p>Opening your library…</p></div>}
       {library && !space && <div className="empty-state board-empty"><IconFolder size={42} stroke={1.2} /><h2>Make room for your next idea</h2><p>Create a space to start organizing your tabs.</p><button className="primary-button" onClick={newSpace}>Create Space</button></div>}
       {space && <fieldset className="workspace-fieldset" disabled={busy || !!state.libraryError}>
-        <header className="space-header"><div className="space-title"><span className="space-symbol">{space.name.slice(0, 1).toUpperCase()}</span><h1>{space.name}</h1><span className="space-stats">{space.collections.length} Collections <span>·</span> {space.collections.reduce((n, c) => n + c.tabs.length, 0)} tabs</span></div></header>
+        <header className="space-header"><div className="space-title"><span className={`space-symbol color-${spaceIndex % 5}`}>{space.name.slice(0, 1).toUpperCase()}</span><h1>{space.name}</h1><span className="space-stats">{space.collections.length} Collections <span>·</span> {space.collections.reduce((n, c) => n + c.tabs.length, 0)} tabs</span></div></header>
         <div className="board-toolbar"><div className="toolbar-left"><span className="order-label"><IconArrowDown size={15} />Custom order</span><span className="toolbar-divider" /><Tool label="Expand all collections" onClick={() => setCollapsed(new Set())}><IconPlus size={19} /></Tool><Tool label="Collapse all collections" onClick={() => setCollapsed(new Set(space.collections.map(c => c.id)))}><IconMinus size={19} /></Tool></div><button className="primary-button" onClick={() => boardActions.create()}><IconPlus size={18} />New Collection</button></div>
         {library?.preferences.saveDisposition !== 'ask' && <div className="preference-note">Saving tabs will {library?.preferences.saveDisposition === 'close' ? 'close them after they are saved' : 'keep them open'}. <button className="text-button" onClick={settings}>Change</button></div>}
         <Board space={space} collapsed={collapsed} toggle={id => setCollapsed(prev => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; })} drag={drag} actions={boardActions} />
@@ -233,7 +241,9 @@ function Workspace() {
   </div>;
 }
 
-/** 提供统一主题与可访问的弹窗／通知环境，状态由后台本地资料库驱动。 */
+/** 提供随界面偏好切换的 Mantine 主题与可访问的弹窗／通知环境，状态由后台本地资料库驱动。 */
 export default function App() {
-  return <MantineProvider forceColorScheme="light" theme={{ primaryColor: 'pink', primaryShade: 6, fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif', defaultRadius: 'md', colors: { pink: ['#fff0f5', '#ffe0eb', '#ffb9d0', '#ff91b4', '#fa709e', '#f6538c', '#ed467f', '#d23268', '#b92656', '#9f1947'] } }}><Notifications position="bottom-center" limit={3} /><Workspace /></MantineProvider>;
+  const { theme, mode } = useActiveTheme();
+  const mantineTheme = useMemo(() => toMantineTheme(theme[mode]), [theme, mode]);
+  return <MantineProvider forceColorScheme={mode} theme={mantineTheme}><Notifications position="bottom-center" limit={3} /><Workspace /></MantineProvider>;
 }
