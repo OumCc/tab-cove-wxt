@@ -36,6 +36,7 @@ let groups = [{ id: 10, windowId: 1, title: 'In progress', color: 'blue' as cons
 let nextTab = 20;
 const port: BrowserPort = {
   getTabs: async id => structuredClone(tabs.filter(t => t.windowId === id)), getTab: async id => structuredClone(tabs.find(t => t.id === id)), getGroup: async id => { const group = groups.find(g => g.id === id); if (!group) throw Error('Group not found'); return group; },
+  getGroups: async windowId => structuredClone(groups.filter(group => group.windowId === windowId)),
   focus: async id => { tabs.forEach(t => { t.active = t.id === id; }); }, close: async id => { tabs = tabs.filter(t => t.id !== id); },
   move: async (id, target) => { const tab = tabs.find(t => t.id === id)!; tabs = tabs.filter(t => t.id !== id); tab.windowId = target.windowId; tab.groupId = target.groupId ?? -1; const index = tabs.findIndex(t => t.id === target.beforeTabId); tabs.splice(index < 0 ? tabs.length : index, 0, tab); tabs.forEach((t, i) => { t.index = i; }); },
   editGroup: async (id, patch) => { Object.assign(groups.find(g => g.id === id)!, patch); }, ungroup: async id => { tabs.forEach(t => { if (t.groupId === id) t.groupId = -1; }); groups = groups.filter(g => g.id !== id); },

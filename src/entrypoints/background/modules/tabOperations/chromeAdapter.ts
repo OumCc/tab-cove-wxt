@@ -46,6 +46,11 @@ export function createChromePort(browser: typeof BrowserApi): BrowserPort {
     },
     async getTabs(windowId) { await checkWindow(windowId); return (await browser.tabs.query({ windowId })).filter(isVisibleBrowserTab).map(liveTab); },
     async getGroup(id) { const group = await browser.tabGroups.get(id); await checkWindow(group.windowId); return { ...group, title: group.title || '' }; },
+    async getGroups(windowId) {
+      await checkWindow(windowId);
+      const groups = await browser.tabGroups.query({ windowId });
+      return groups.map(group => ({ ...group, title: group.title || '' }));
+    },
     async focus(id) { const tab = await checkTab(id); await browser.tabs.update(id, { active: true }); await browser.windows.update(tab.windowId, { focused: true }); },
     async close(id, scope) {
       const tab = await checkTab(id);

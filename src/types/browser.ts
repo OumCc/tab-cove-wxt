@@ -18,4 +18,4 @@ export type BrowserOperation = { locale?: Locale } & (
   | { type: 'editGroup'; groupId: number; title?: string; color?: GroupColor; collapsed?: boolean }
   | { type: 'ungroup'; groupId: number }
   | { type: 'save'; preview: SavePreview; target: SaveTarget; disposition: 'keep' | 'close'; remember: boolean }
-  | { type: 'open'; items: OpenItem[]; target: OpenTarget; group?: { title: string; color: GroupColor }; remember?: 'tabs' | 'group'; opened?: Record<string, number>; activate?: boolean });
+  | { type: 'open'; items: OpenItem[]; target: OpenTarget; group?: { title: string; color?: GroupColor }; remember?: 'tabs' | 'group'; opened?: Record<string, number>; activate?: boolean });

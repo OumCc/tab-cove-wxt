@@ -27,7 +27,14 @@ function fixture() {
       group: async details => { calls.push(['group', details]); return details.groupId ?? 99; },
       create: async details => { calls.push(['create', details]); return { id: 101 }; },
     },
-    tabGroups: { get: async id => get(groups, id), update: async (id, patch) => { calls.push(['editGroup', id, patch]); } },
+    tabGroups: {
+      get: async id => get(groups, id),
+      query: async filter => {
+        calls.push(['queryGroups', filter]);
+        return [...groups.values()].filter(group => filter.windowId === group.windowId).map(group => structuredClone(group));
+      },
+      update: async (id, patch) => { calls.push(['editGroup', id, patch]); },
+    },
   };
   return { api, calls, tabs, windows, groups, port: createChromePort(api) };
 }
@@ -84,6 +91,12 @@ test('group restore creates a new native group and rejects tabs that moved away'
   assert.deepEqual(f.calls, [['group', { tabIds: [1, 2], createProperties: { windowId: 10 } }]]);
   f.calls.length = 0; f.tabs.get(2).windowId = 20;
   await assert.rejects(f.port.group([1, 2], 10)); assert.deepEqual(f.calls, []);
+});
+test('native group color lookup is scoped to the target window and includes collapsed groups', async () => {
+  const f = fixture();
+  f.groups.set(8, { id: 8, windowId: 10, color: 'red', collapsed: true });
+  assert.deepEqual(await f.port.getGroups(10), [{ id: 8, windowId: 10, title: '', color: 'red', collapsed: true }]);
+  assert.deepEqual(f.calls, [['queryGroups', { windowId: 10 }]]);
 });
 test('read failures are distinct from confirmed missing tabs and pending URLs remain usable', async () => {
   const f = fixture(); assert.equal(await f.port.getTab(404), undefined);

@@ -95,7 +95,7 @@ function Workspace() {
   function openCollection(collection: Collection) {
     if (currentWindowId === undefined) { notifications.show({ closeButtonProps: { 'aria-label': t('Close') }, color: 'red', message: t('The current browser window is unavailable. Refresh this workspace.') }); return; }
     const target: OpenTarget = { windowId: currentWindowId };
-    const submit = (group: boolean, remember: boolean) => perform({ type: 'open', items: collection.tabs, target, ...(group ? { group: { title: collection.name, color: collection.groupColor || 'grey' } } : {}), ...(remember ? { remember: group ? 'group' as const : 'tabs' as const } : {}) });
+    const submit = (group: boolean, remember: boolean) => perform({ type: 'open', items: collection.tabs, target, ...(group ? { group: { title: collection.name, color: collection.groupColor } } : {}), ...(remember ? { remember: group ? 'group' as const : 'tabs' as const } : {}) });
     const mode = library!.preferences.restoreMode;
     if (mode !== 'ask') { run(() => submit(mode === 'group', false)); return; }
     setChoice({ key: ++dialogId.current, title: t('Open collection?'), description: t(snapshot?.groupsAvailable === false ? 'Open {tabs} from {name}? Tab groups are currently unavailable.' : 'Open {tabs} from {name} as a Chrome tab group?', { tabs: count('tabs', collection.tabs.length), name: collection.name }), left: t('Open Tabs'), right: t('Open as Group'), rightDisabled: snapshot?.groupsAvailable === false, onChoose: submit });
