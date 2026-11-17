@@ -79,9 +79,19 @@ button { -webkit-tap-highlight-color: transparent; }
 .card-open small { grid-column: 1 / -1; color: var(--tc-text-subtle); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .favicon { display: inline-grid; place-items: center; width: 20px; height: 20px; flex-shrink: 0; background: var(--tc-hover); color: var(--tc-text-muted); border-radius: 5px; font-size: 10px; font-weight: 600; }
 .favicon img { width: 16px; height: 16px; object-fit: contain; }
-.card-tools { position: absolute; right: 5px; top: 5px; display: flex; opacity: 0; background: var(--tc-surface); border-radius: 6px; }
-.card-tools .tool { width: 24px; height: 24px; }
-.tab-card:hover .card-tools, .tab-card:focus-within .card-tools { opacity: 1; }
+.card-delete, .card-tools { position: absolute; right: 8px; opacity: 0; pointer-events: none; }
+.card-delete.tool { top: 8px; width: 24px; height: 24px; color: var(--tc-danger); }
+.card-delete.tool:hover { color: var(--tc-danger); background: color-mix(in srgb, var(--tc-danger) 16%, transparent); }
+.card-tools { bottom: 8px; display: flex; background: var(--tc-surface); border: 1px solid var(--tc-border-strong); border-radius: 999px; }
+.card-tools > .tool { width: 36px; height: 28px; }
+.card-tools > .tool:first-child { border-radius: 999px 0 0 999px; }
+.card-tools > .tool:last-child { border-left: 1px solid var(--tc-border-strong); border-radius: 0 999px 999px 0; }
+/* 更多菜单渲染在卡片外，展开期间也要显示触发按钮。 */
+.tab-card:is(:hover, :focus-within, :has(.card-tools > [aria-expanded='true'])) {
+  > .card-delete, > .card-tools { opacity: 1; pointer-events: auto; }
+  .card-title { margin-right: 24px; }
+  .card-open small { margin-right: 72px; }
+}
 .drop-zone { min-width: 0; }
 .drop-zone > span { display: none; }
 .collection-gap { height: 24px; margin: 3px 0; border-radius: 8px; }

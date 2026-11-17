@@ -2,7 +2,7 @@
 import type { DragEvent } from 'react';
 import { useI18n, t, count } from '../../../i18n/index.ts';
 import { Menu } from '@mantine/core';
-import { IconArrowDown, IconArrowUp, IconArrowsMove, IconChevronDown, IconChevronRight, IconDownload, IconEdit, IconExternalLink, IconGripVertical, IconPlus, IconStack2, IconTrash, IconX } from '@tabler/icons-react';
+import { IconArrowDown, IconArrowUp, IconArrowsMove, IconChevronDown, IconChevronRight, IconDownload, IconEdit, IconExternalLink, IconGripVertical, IconPlus, IconStack2, IconTrash } from '@tabler/icons-react';
 import type { Collection, SavedTab, Space } from '../../../types/core.ts';
 import { DropZone, Favicon, MoreMenu, Tool, type DragItem } from './ui';
 export interface BoardActions {
@@ -46,13 +46,16 @@ export function Board({ space, collapsed, toggle, drag, actions }: { space: Spac
           {c.tabs.map((tab, ti) => <DropZone key={tab.id} active={!!drag && ['tab', 'live'].includes(drag.kind) && drag.id !== tab.id} label={t('Insert before {name}', { name: tab.title })} className="card-drop" onDrop={() => actions.dropCollection(c.id, tab.id)}>
             <article className="tab-card" draggable onDragStart={e => actions.startDrag(e, { kind: 'tab', id: tab.id })}>
               <button className="card-open" title={tab.url} onClick={() => actions.openTab(tab)}><Favicon url={tab.url} title={tab.title} /><span className="card-title">{tab.title}</span><small>{new URL(tab.url).hostname.replace(/^www\./, '')}</small></button>
-              <div className="card-tools"><Tool label={t('Remove {name}', { name: tab.title })} onClick={() => actions.removeTab(tab)}><IconX size={15} /></Tool><MoreMenu label={t('Options for {name}', { name: tab.title })}>
-                <Menu.Item leftSection={<IconEdit size={15} />} onClick={() => actions.editTab(tab)}>{t('Edit title & URL')}</Menu.Item>
-                <Menu.Item leftSection={<IconArrowsMove size={15} />} onClick={() => actions.moveTab(tab)}>{t('Move to collection')}</Menu.Item>
-                <Menu.Item onClick={() => actions.newCollectionFromTab(tab)}>{t('Move to new collection')}</Menu.Item>
-                <Menu.Item disabled={ti === 0} onClick={() => actions.reorderTab(tab, c.id, c.tabs[ti - 1]?.id)}>{t('Move earlier')}</Menu.Item>
-                <Menu.Item disabled={ti === c.tabs.length - 1} onClick={() => actions.reorderTab(tab, c.id, c.tabs[ti + 2]?.id)}>{t('Move later')}</Menu.Item>
-              </MoreMenu></div>
+              <Tool className="tool card-delete" label={t('Remove {name}', { name: tab.title })} onClick={() => actions.removeTab(tab)}><IconTrash size={16} /></Tool>
+              <div className="card-tools">
+                <Tool label={t('Edit title & URL')} onClick={() => actions.editTab(tab)}><IconEdit size={16} /></Tool>
+                <MoreMenu label={t('Options for {name}', { name: tab.title })}>
+                  <Menu.Item leftSection={<IconArrowsMove size={15} />} onClick={() => actions.moveTab(tab)}>{t('Move to collection')}</Menu.Item>
+                  <Menu.Item onClick={() => actions.newCollectionFromTab(tab)}>{t('Move to new collection')}</Menu.Item>
+                  <Menu.Item disabled={ti === 0} onClick={() => actions.reorderTab(tab, c.id, c.tabs[ti - 1]?.id)}>{t('Move earlier')}</Menu.Item>
+                  <Menu.Item disabled={ti === c.tabs.length - 1} onClick={() => actions.reorderTab(tab, c.id, c.tabs[ti + 2]?.id)}>{t('Move later')}</Menu.Item>
+                </MoreMenu>
+              </div>
             </article>
           </DropZone>)}
           <DropZone active={!!drag && ['tab', 'live'].includes(drag.kind)} label={c.tabs.length ? t('Add tabs here') : t('Drag tabs here')} className={c.tabs.length ? 'append-card' : 'empty-collection'} onDrop={() => actions.dropCollection(c.id)} />
