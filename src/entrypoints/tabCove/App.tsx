@@ -1,6 +1,5 @@
 /** 单机工作台编排：页面只提交领域命令，收藏写入和 Chrome 副作用交给后台。 */
 import { useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
-import type { MessageKey } from '../../i18n/messages.ts';
 import { useI18n, t, count, errorMessage } from '../../i18n/index.ts';
 import { Alert, Button, MantineProvider, Menu } from '@mantine/core';
 import { Notifications, notifications } from '@mantine/notifications';
@@ -9,17 +8,17 @@ import { browser } from 'wxt/browser';
 import { useWorkspace } from '../../store/workspace.ts';
 import { useUiPreferences } from '../../store/uiPreferences.ts';
 import { browserOperation, getSavePreview } from '../../services/core.ts';
-import { findCollection } from '../../services/libraryModel.ts';
+import { findCollection, GROUP_COLORS } from '../../services/libraryModel.ts';
 import { LIBRARY_KEY } from '../../utils/storage/index.ts';
 import { onMessage } from '../../types/messaging.ts';
-import type { Collection, LibraryCommand, SavedTab, SaveTarget } from '../../types/core.ts';
+import type { Collection, GroupColor, LibraryCommand, SavedTab, SaveTarget } from '../../types/core.ts';
 import type { BrowserOperation, OpenTarget, OperationReport, TabSource } from '../../types/browser.ts';
 import { Board, type BoardActions } from './components/Board';
 import { OpenTabs } from './components/OpenTabs';
 import { ChoiceDialog, EditorDialog, type EditorConfig } from './components/Dialogs';
 import { DataTransferDialog } from './components/DataTransferDialog';
 import { Search, type SearchResult } from './components/Search';
-import { DropZone, MoreMenu, Tool, groupColors, type DragItem } from './components/ui';
+import { DropZone, MoreMenu, Tool, groupColorLabel, type DragItem } from './components/ui';
 import { LanguageMenu } from './components/LanguageMenu';
 import { AppearanceMenu } from './components/AppearanceMenu';
 import { toMantineTheme, useActiveTheme } from './theme/index.ts';
@@ -157,6 +156,7 @@ function Workspace() {
   const boardActions: BoardActions = {
     create: beforeId => nameForm(t('New collection'), '', name => mutate({ type: 'collection:create', spaceId: space!.id, name, beforeId })),
     rename: c => nameForm(t('Rename collection'), c.name, name => mutate({ type: 'collection:rename', id: c.id, name })),
+    setGroupColor: (c, color) => run(() => mutate({ type: 'collection:setGroupColor', id: c.id, groupColor: color })),
     remove: c => confirm(t('Delete collection?'), t('Delete {name} and its {tabs}? Open browser tabs will stay open.', { name: c.name, tabs: count('tabs', c.tabs.length) }), () => mutate({ type: 'collection:delete', id: c.id })),
     open: openCollection,
     save: c => run(() => save({ windowId: windowTarget().windowId }, { collectionId: c.id })),
@@ -241,7 +241,7 @@ function Workspace() {
         closeTabs: (windowId, groupId) => run(() => perform({ type: 'closeTabs', windowId, groupId })),
         collapse: group => run(() => perform({ type: 'editGroup', groupId: group.id, collapsed: !group.collapsed })),
         ungroup: group => run(() => perform({ type: 'ungroup', groupId: group.id })),
-        editGroup: group => form({ title: t('Edit tab group'), fields: [{ key: 'name', label: t('Group name'), value: group.title, optional: true }, { key: 'color', label: t('Color'), value: group.color, options: Object.keys(groupColors).map(color => ({ value: color, label: t((color.charAt(0).toUpperCase() + color.slice(1)) as MessageKey) })) }], onSubmit: v => perform({ type: 'editGroup', groupId: group.id, title: v.name, color: v.color as keyof typeof groupColors }) }),
+        editGroup: group => form({ title: t('Edit tab group'), fields: [{ key: 'name', label: t('Group name'), value: group.title, optional: true }, { key: 'color', label: t('Color'), value: group.color, options: GROUP_COLORS.map(color => ({ value: color, label: groupColorLabel(color) })) }], onSubmit: v => perform({ type: 'editGroup', groupId: group.id, title: v.name, color: v.color as GroupColor }) }),
       }} />
     </fieldset></aside>
     {editor && <EditorDialog key={editor.key} config={editor} onClose={() => setEditor(undefined)} />}

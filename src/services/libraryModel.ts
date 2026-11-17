@@ -6,7 +6,7 @@ export class AppError extends Error {
   code: ErrorCode;
   constructor(code: ErrorCode, message: string) { super(message); this.code = code; }
 }
-/** Chrome 原生组的合法颜色，用于验证及编辑控件。 */
+/** Chrome 原生组颜色及顺序，供校验、恢复和编辑使用。 */
 export const GROUP_COLORS = ['grey', 'blue', 'red', 'yellow', 'green', 'pink', 'purple', 'cyan', 'orange'] as const;
 /** 保留原始 URL 的查询与 fragment，仅允许可恢复的网页协议。 */
 export function validUrl(value: unknown): value is string {
@@ -69,6 +69,15 @@ export function applyCommand(document: LibraryDocument, command: LibraryCommand,
     }
     case 'collection:create': insert(findSpace(d, command.spaceId).collections, { id: id(), name: name(command.name), tabs: [], ...(command.groupColor ? { groupColor: command.groupColor } : {}) }, command.beforeId); break;
     case 'collection:rename': findCollection(d, command.id).collection.name = name(command.name); break;
+    case 'collection:setGroupColor': {
+      const { collection } = findCollection(d, command.id);
+      if (command.groupColor === null) delete collection.groupColor;
+      else {
+        if (!GROUP_COLORS.includes(command.groupColor)) invalid('Choose a valid tab group color.');
+        collection.groupColor = command.groupColor;
+      }
+      break;
+    }
     case 'collection:delete': { const { space } = findCollection(d, command.id); remove(space.collections, command.id); break; }
     case 'collection:move': {
       const { space, collection } = findCollection(d, command.id); const target = findSpace(d, command.spaceId);

@@ -1,6 +1,7 @@
 /** 本地资料库及跨上下文命令；永久收藏不引用浏览器会话标识。 */
 export type GroupColor = 'grey' | 'blue' | 'red' | 'yellow' | 'green' | 'pink' | 'purple' | 'cyan' | 'orange';
 export interface SavedTab { id: string; title: string; url: string }
+/** 未保存固定组色的集合在恢复为 Chrome 标签组时自动选色。 */
 export interface Collection { id: string; name: string; tabs: SavedTab[]; groupColor?: GroupColor }
 export interface Space { id: string; name: string; collections: Collection[] }
 export interface Preferences { saveDisposition: 'ask' | 'keep' | 'close'; restoreMode: 'ask' | 'tabs' | 'group' }
@@ -12,6 +13,7 @@ export type LibraryCommand =
   | { type: 'space:move'; id: string; beforeId?: string }
   | { type: 'collection:create'; spaceId: string; name: string; beforeId?: string; groupColor?: GroupColor }
   | { type: 'collection:rename'; id: string; name: string }
+  | { type: 'collection:setGroupColor'; id: string; groupColor: GroupColor | null }
   | { type: 'collection:delete'; id: string }
   | { type: 'collection:move'; id: string; spaceId: string; beforeId?: string }
   | { type: 'collection:merge'; id: string; targetId: string }

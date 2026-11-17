@@ -3,10 +3,31 @@ import { useState, type DragEvent, type ReactNode, type ButtonHTMLAttributes } f
 import { Menu } from '@mantine/core';
 import { IconDots } from '@tabler/icons-react';
 import { browser } from 'wxt/browser';
+import { t } from '../../../i18n/index.ts';
+import type { MessageKey } from '../../../i18n/messages.ts';
 import type { GroupColor } from '../../../types/core.ts';
 export type DragItem = { kind: 'tab' | 'collection' | 'space'; id: string } | { kind: 'live'; id: number };
-/** Chrome 颜色名称到界面色值的映射，不承担收藏主题设置。 */
-export const groupColors: Record<GroupColor, string> = { grey: '#80868b', blue: '#4285f4', red: '#ea4335', yellow: '#e8a200', green: '#34a853', pink: '#e76bb3', purple: '#a142f4', cyan: '#00a0ae', orange: '#ed791d' };
+/**
+ * 原生标签组色样，随工作台的明暗模式调整。
+ * @see https://chromium.googlesource.com/chromium/src/+/main/chrome/browser/ui/color/tab_group_color_ids.h
+ */
+export const groupColors: Record<GroupColor, string> = {
+  grey: 'light-dark(#5f6369, #dfe2e9)',
+  blue: 'light-dark(#436bd7, #a8bcff)',
+  red: 'light-dark(#db1b2b, #ff928b)',
+  yellow: 'light-dark(#ffd036, #ffdd7a)',
+  green: 'light-dark(#188129, #87eb84)',
+  pink: 'light-dark(#c809a8, #ff96de)',
+  purple: 'light-dark(#9d39f3, #cb93ff)',
+  cyan: 'light-dark(#007b83, #88e3eb)',
+  orange: 'light-dark(#ff9436, #ffb379)',
+};
+const groupColorMessages: Record<GroupColor, MessageKey> = {
+  grey: 'Grey', blue: 'Blue', red: 'Red', yellow: 'Yellow', green: 'Green',
+  pink: 'Pink', purple: 'Purple', cyan: 'Cyan', orange: 'Orange',
+};
+/** 用当前界面语言显示固定的 Chrome 标签组颜色名。 */
+export function groupColorLabel(color: GroupColor): string { return t(groupColorMessages[color]); }
 /** 可访问的图标按钮，原生 title 同时用于鼠标提示。 */
 export function Tool({ label, children, ...props }: { label: string; children: ReactNode } & ButtonHTMLAttributes<HTMLButtonElement>) {
   return <button type="button" className="tool" aria-label={label} title={label} {...props}>{children}</button>;

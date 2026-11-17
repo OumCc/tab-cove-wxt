@@ -45,6 +45,24 @@ test('merge appends source order and retains target identity and group metadata'
   assert.equal(f.doc.spaces[0].collections[0].id, f.b);
   assert.deepEqual(f.doc.spaces[0].collections[0].tabs.map(t => t.title), ['old', 'a', 'b', 'c']);
 });
+test('collection colors can switch from saved grey to random and back to a fixed Chrome color', () => {
+  const f = fixture();
+  const collection = f.doc.spaces[0].collections[0];
+  collection.groupColor = 'grey';
+  const { id, name, tabs } = collection;
+  const command = { type: 'collection:setGroupColor', id };
+
+  f.act({ ...command, groupColor: null });
+  assert.deepEqual(f.doc.spaces[0].collections[0], { id, name, tabs });
+  assert.equal(collection.groupColor, 'grey');
+
+  f.act({ ...command, groupColor: 'purple' });
+  assert.deepEqual(f.doc.spaces[0].collections[0], { id, name, tabs, groupColor: 'purple' });
+  for (const groupColor of ['random', undefined]) {
+    assert.throws(() => f.act({ ...command, groupColor }), { code: 'INVALID_INPUT' });
+  }
+  assert.equal(f.doc.spaces[0].collections[0].groupColor, 'purple');
+});
 test('gap creation is one change and retains the moved card identity', () => {
   const f = fixture(); const tab = f.doc.spaces[0].collections[0].tabs[0];
   f.act({ type: 'tab:newCollection', id: tab.id, spaceId: f.spaceId, name: 'New', beforeId: f.b });

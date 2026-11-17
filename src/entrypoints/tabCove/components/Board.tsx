@@ -2,11 +2,14 @@
 import type { DragEvent } from 'react';
 import { useI18n, t, count } from '../../../i18n/index.ts';
 import { Menu } from '@mantine/core';
-import { IconArrowDown, IconArrowUp, IconArrowsMove, IconChevronDown, IconChevronRight, IconDownload, IconEdit, IconExternalLink, IconGripVertical, IconPlus, IconStack2, IconTrash } from '@tabler/icons-react';
-import type { Collection, SavedTab, Space } from '../../../types/core.ts';
-import { DropZone, Favicon, MoreMenu, Tool, type DragItem } from './ui';
+import { IconArrowDown, IconArrowUp, IconArrowsMove, IconArrowsShuffle, IconCheck, IconChevronDown, IconChevronRight, IconDownload, IconEdit, IconExternalLink, IconGripVertical, IconPlus, IconStack2, IconTrash } from '@tabler/icons-react';
+import { GROUP_COLORS } from '../../../services/libraryModel.ts';
+import type { Collection, GroupColor, SavedTab, Space } from '../../../types/core.ts';
+import { DropZone, Favicon, MoreMenu, Tool, groupColorLabel, groupColors, type DragItem } from './ui';
 export interface BoardActions {
   create(beforeId?: string): void; rename(collection: Collection): void; remove(collection: Collection): void;
+  /** 保存固定组色，传入 null 时恢复为随机颜色。 */
+  setGroupColor(collection: Collection, color: GroupColor | null): void;
   open(collection: Collection): void; save(collection: Collection): void; move(collection: Collection): void;
   mergeCollection(collection: Collection): void;
   newCollectionFromTab(tab: SavedTab): void;
@@ -17,6 +20,40 @@ export interface BoardActions {
   dropCollection(targetId: string, beforeId?: string): void;
   dropGap(beforeId?: string): void; merge(targetId: string): void;
 }
+
+function colorSwatch(color?: GroupColor) {
+  return color
+    ? <span className="collection-color-swatch" style={{ backgroundColor: groupColors[color] }} aria-hidden="true" />
+    : <IconArrowsShuffle size={13} aria-hidden="true" />;
+}
+
+function CollectionColorMenu({ collection, onChange }: { collection: Collection; onChange: (color: GroupColor | null) => void }) {
+  const { name, groupColor } = collection;
+  const randomLabel = t('Random color');
+  const colorLabel = groupColor ? groupColorLabel(groupColor) : randomLabel;
+  return <Menu position="bottom-start" withinPortal checkIcon={<IconCheck size={13} aria-hidden="true" />}>
+    <Menu.Target>
+      <button type="button" className="collection-color" title={t('Tab group color')} aria-label={t('Tab group color for {name}, {color}', { name, color: colorLabel })}>
+        {colorSwatch(groupColor)}
+        {colorLabel}
+        <IconChevronDown size={12} aria-hidden="true" />
+      </button>
+    </Menu.Target>
+    <Menu.Dropdown>
+      <Menu.Label>{t('Tab group color')}</Menu.Label>
+      <Menu.RadioGroup value={groupColor ?? 'random'}>
+        <Menu.RadioItem value="random" onChange={() => onChange(null)} closeMenuOnClick>
+          <span className="collection-color-option">{colorSwatch()}{randomLabel}</span>
+        </Menu.RadioItem>
+        <Menu.Divider />
+        {GROUP_COLORS.map(color => <Menu.RadioItem key={color} value={color} onChange={() => onChange(color)} closeMenuOnClick>
+          <span className="collection-color-option">{colorSwatch(color)}{groupColorLabel(color)}</span>
+        </Menu.RadioItem>)}
+      </Menu.RadioGroup>
+    </Menu.Dropdown>
+  </Menu>;
+}
+
 /** 展示集合卡片并提供同一套命令的鼠标和键盘入口。 */
 export function Board({ space, collapsed, toggle, drag, actions }: { space: Space; collapsed: Set<string>; toggle(id: string): void; drag?: DragItem; actions: BoardActions }) {
   useI18n();
@@ -27,7 +64,13 @@ export function Board({ space, collapsed, toggle, drag, actions }: { space: Spac
       <section className="collection" id={`collection-${c.id}`} aria-labelledby={`heading-${c.id}`}>
         <header className="collection-header">
           <Tool label={t('Reorder {name}', { name: c.name })} draggable onDragStart={e => actions.startDrag(e, { kind: 'collection', id: c.id })}><IconGripVertical size={18} /></Tool>
-          <div className="collection-heading"><h2 id={`heading-${c.id}`}><button className="collection-name" onClick={() => actions.rename(c)} title={t('Rename collection')}>{c.name}</button><Tool label={t(collapsed.has(c.id) ? 'Expand {name}' : 'Collapse {name}', { name: c.name })} aria-expanded={!collapsed.has(c.id)} onClick={() => toggle(c.id)}>{collapsed.has(c.id) ? <IconChevronRight size={18} /> : <IconChevronDown size={18} />}</Tool></h2><span className="muted">{count('tabs', c.tabs.length)}</span></div>
+          <div className="collection-heading">
+            <h2 id={`heading-${c.id}`}><button className="collection-name" onClick={() => actions.rename(c)} title={t('Rename collection')}>{c.name}</button><Tool label={t(collapsed.has(c.id) ? 'Expand {name}' : 'Collapse {name}', { name: c.name })} aria-expanded={!collapsed.has(c.id)} onClick={() => toggle(c.id)}>{collapsed.has(c.id) ? <IconChevronRight size={18} /> : <IconChevronDown size={18} />}</Tool></h2>
+            <div className="collection-meta">
+              <span className="muted">{count('tabs', c.tabs.length)}</span>
+              <CollectionColorMenu collection={c} onChange={color => actions.setGroupColor(c, color)} />
+            </div>
+          </div>
           <div className="collection-tools">
             <Tool label={t('Open all tabs in {name}', { name: c.name })} disabled={!c.tabs.length} onClick={() => actions.open(c)}><IconExternalLink size={18} /></Tool>
             <Tool label={t('Save session into {name}', { name: c.name })} onClick={() => actions.save(c)}><IconDownload size={18} /></Tool>
