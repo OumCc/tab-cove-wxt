@@ -4,7 +4,7 @@ import type { MessageKey } from '../../i18n/messages.ts';
 import { useI18n, t, count, errorMessage } from '../../i18n/index.ts';
 import { Alert, Button, MantineProvider, Menu } from '@mantine/core';
 import { Notifications, notifications } from '@mantine/notifications';
-import { IconArrowDown, IconArrowUp, IconEdit, IconFolder, IconLayoutSidebarLeftCollapse, IconLayoutSidebarLeftExpand, IconLayoutSidebarRight, IconMinus, IconPlus, IconSearch, IconSettings, IconTrash } from '@tabler/icons-react';
+import { IconArrowDown, IconArrowUp, IconDatabase, IconEdit, IconFolder, IconLayoutSidebarLeftCollapse, IconLayoutSidebarLeftExpand, IconLayoutSidebarRight, IconMinus, IconPlus, IconSearch, IconSettings, IconTrash } from '@tabler/icons-react';
 import { browser } from 'wxt/browser';
 import { useWorkspace } from '../../store/workspace.ts';
 import { useUiPreferences } from '../../store/uiPreferences.ts';
@@ -17,6 +17,7 @@ import type { BrowserOperation, OpenTarget, OperationReport, TabSource } from '.
 import { Board, type BoardActions } from './components/Board';
 import { OpenTabs } from './components/OpenTabs';
 import { ChoiceDialog, EditorDialog, type EditorConfig } from './components/Dialogs';
+import { DataTransferDialog } from './components/DataTransferDialog';
 import { Search, type SearchResult } from './components/Search';
 import { DropZone, MoreMenu, Tool, groupColors, type DragItem } from './components/ui';
 import { LanguageMenu } from './components/LanguageMenu';
@@ -33,6 +34,8 @@ function Workspace() {
   const { library, snapshot, spaceId } = state;
   const spaceIndex = library?.spaces.findIndex(s => s.id === spaceId) ?? -1; const space = library?.spaces[spaceIndex];
   const [editor, setEditor] = useState<EditorConfig>(); const [choice, setChoice] = useState<ChoiceConfig>();
+  const [dataTransferOpen, setDataTransferOpen] = useState(false);
+  const dataTransferTrigger = useRef<HTMLButtonElement>(null);
   const [search, setSearch] = useState(false); const [collapsed, setCollapsed] = useState(new Set<string>());
   const [drag, setDrag] = useState<DragItem>(); const [report, setReport] = useState<OperationReport>();
   const [working, setWorking] = useState(false); const [currentWindowId, setCurrentWindowId] = useState<number>();
@@ -56,13 +59,13 @@ function Workspace() {
   useEffect(() => {
     const keys = (event: KeyboardEvent) => {
       if (event.key === 'Escape') clearDrag();
-      if (event.isComposing || editor || choice || search) return;
+      if (event.isComposing || editor || choice || search || dataTransferOpen) return;
       const input = event.target instanceof HTMLElement && (event.target.matches('input,textarea,select') || event.target.isContentEditable);
       if ((!input && event.key === '/') || ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k')) { event.preventDefault(); if (library) setSearch(true); }
     };
     window.addEventListener('keydown', keys); window.addEventListener('dragend', clearDrag);
     return () => { window.removeEventListener('keydown', keys); window.removeEventListener('dragend', clearDrag); };
-  }, [editor, choice, search, library]);
+  }, [editor, choice, search, library, dataTransferOpen]);
   useEffect(() => () => clearDrag(), []);
 
   function run(task: () => Promise<unknown>) { void task().catch(error => notifications.show({ closeButtonProps: { 'aria-label': t('Close') }, color: 'red', title: t('Could not complete action'), message: errorMessage(error), autoClose: false })); }
@@ -200,6 +203,7 @@ function Workspace() {
         <AppearanceMenu />
         <LanguageMenu />
         <button title={t('Settings')} onClick={settings} disabled={!library}><IconSettings size={18} /><span className="label">{t('Settings')}</span></button>
+        <button ref={dataTransferTrigger} title={t('Data management')} aria-label={t('Data management')} onClick={() => setDataTransferOpen(true)} disabled={busy}><IconDatabase size={18} aria-hidden="true" /><span className="label">{t('Data management')}</span></button>
         <button title={sidebarCollapsed ? t('Expand sidebar') : t('Collapse sidebar')} aria-expanded={!sidebarCollapsed} onClick={() => updateUi({ sidebarCollapsed: !sidebarCollapsed })}>{sidebarCollapsed ? <IconLayoutSidebarLeftExpand size={18} /> : <IconLayoutSidebarLeftCollapse size={18} />}<span className="label">{t('Collapse')}</span></button>
         <div className="local-status"><span />{t('Saved on this device')}</div>
       </footer>
@@ -241,6 +245,7 @@ function Workspace() {
     </fieldset></aside>
     {editor && <EditorDialog key={editor.key} config={editor} onClose={() => setEditor(undefined)} />}
     {choice && <ChoiceDialog {...choice} onClose={() => setChoice(undefined)} />}
+    {dataTransferOpen && <DataTransferDialog onClose={() => { setDataTransferOpen(false); requestAnimationFrame(() => dataTransferTrigger.current?.focus()); }} />}
     {search && library && <Search library={library} snapshot={snapshot} onOpen={searchOpen} onJump={jump} onClose={() => setSearch(false)} />}
   </div>;
 }

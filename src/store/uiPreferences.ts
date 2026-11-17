@@ -3,13 +3,10 @@
  * 使用同步的 localStorage，保证首次渲染前即可读取，避免主题闪烁。
  */
 import { create } from 'zustand';
-import { languagePreference, type LanguagePreference } from '../i18n/core.ts';
+import { languagePreference } from '../i18n/core.ts';
+import type { UiPreferences } from '../types/uiPreferences.ts';
 
-/** 用户选择的明暗模式；`system` 跟随操作系统。 */
-export type ColorMode = 'light' | 'dark' | 'system';
-
-/** 会被持久化的界面偏好。`themeId` 不在此处校验，由主题注册表负责降级。 */
-export interface UiPreferences { themeId: string; language: LanguagePreference; colorMode: ColorMode; sidebarCollapsed: boolean }
+export type { ColorMode, UiPreferences } from '../types/uiPreferences.ts';
 
 interface UiPreferencesState extends UiPreferences {
   /** 操作系统当前是否为暗色，仅在 `colorMode` 为 `system` 时生效。 */
@@ -34,6 +31,10 @@ function readStored(): UiPreferences {
   };
 }
 
+function pickPreferences({ themeId, colorMode, sidebarCollapsed, language }: UiPreferences): UiPreferences {
+  return { themeId, colorMode, sidebarCollapsed, language };
+}
+
 /** 界面偏好的唯一来源；主题同步与组件都订阅它。 */
 export const useUiPreferences = create<UiPreferencesState>((set, get) => ({
   ...readStored(),
@@ -41,10 +42,30 @@ export const useUiPreferences = create<UiPreferencesState>((set, get) => ({
   browserLanguages: navigator.languages,
   update(patch) {
     set(patch);
-    const { themeId, colorMode, sidebarCollapsed, language } = get();
-    try { localStorage.setItem(UI_PREFERENCES_KEY, JSON.stringify({ themeId, colorMode, sidebarCollapsed, language } satisfies UiPreferences)); } catch { /* 见 update 的降级说明。 */ }
+    try { localStorage.setItem(UI_PREFERENCES_KEY, JSON.stringify(pickPreferences(get()))); } catch { /* 见 update 的降级说明。 */ }
   },
 }));
+
+/** 同步读取当前界面偏好用于导出，排除浏览器和会话的派生状态。 */
+export function getUiPreferences(): UiPreferences {
+  return pickPreferences(useUiPreferences.getState());
+}
+
+/** 恢复已校验的偏好；写入异常由调用方处理，且原界面状态保持不变。 */
+export function restoreUiPreferences(value: UiPreferences): void {
+  const next = pickPreferences(value);
+  localStorage.setItem(UI_PREFERENCES_KEY, JSON.stringify(next));
+  useUiPreferences.setState(next);
+}
+
+/** 仅在资料库确认写入后恢复偏好；部分成功时只需要重试偏好。 */
+export async function importWithUiPreferences(importLibrary: () => Promise<void>, preferences?: UiPreferences): Promise<'success' | 'partial'> {
+  await importLibrary();
+  if (preferences) {
+    try { restoreUiPreferences(preferences); } catch { return 'partial'; }
+  }
+  return 'success';
+}
 
 darkQuery.addEventListener('change', event => useUiPreferences.setState({ systemDark: event.matches }));
 

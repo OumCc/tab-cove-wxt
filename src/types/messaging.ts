@@ -1,10 +1,12 @@
 /** UI 与 background 的类型化消息协议，所有失败显式返回而不伪装为空数据。 */
 import { defineExtensionMessaging } from '@webext-core/messaging';
+import type { ImportBackupRequest } from './backup.ts';
 import type { LibraryCommand, LibraryDocument, Result } from './core.ts';
 import type { BrowserOperation, BrowserSnapshot, OperationReport, SavePreview, TabSource } from './browser.ts';
 interface ProtocolMap {
-  'library:get': () => Result<LibraryDocument>;
+  'library:get': (options: { readOnly?: boolean } | undefined) => Result<LibraryDocument>;
   'library:mutate': (command: LibraryCommand) => Result<LibraryDocument>;
+  'library:import': (request: ImportBackupRequest) => Result<LibraryDocument>;
   'browser:getSnapshot': () => Result<BrowserSnapshot>;
   'browser:previewSave': (source: TabSource) => Result<SavePreview>;
   'browser:operate': (operation: BrowserOperation) => Result<OperationReport>;

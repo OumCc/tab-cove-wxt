@@ -2,6 +2,7 @@
 import { getLocale } from '../i18n/index.ts';
 import { sendMessage } from '../types/messaging.ts';
 import { AppError } from './libraryModel.ts';
+import type { ImportBackupRequest } from '../types/backup.ts';
 import type { Result, LibraryCommand } from '../types/core.ts';
 import type { BrowserOperation, TabSource } from '../types/browser.ts';
 async function unwrap<T>(pending: Promise<Result<T>>): Promise<T> {
@@ -10,10 +11,12 @@ async function unwrap<T>(pending: Promise<Result<T>>): Promise<T> {
   if (!result.ok) throw new AppError(result.code, result.message);
   return result.value;
 }
-/** 从后台读取经过校验的本地资料库。 */
-export const getLibrary = () => unwrap(sendMessage('library:get'));
+/** 从后台读取经过校验的本地资料库；备份预览可关闭首次读取时的初始化写入。 */
+export const getLibrary = (options?: { readOnly?: boolean }) => unwrap(sendMessage('library:get', options));
 /** 提交一次本地修改；成功响应才代表已持久化。 */
 export const mutateLibrary = (command: LibraryCommand) => unwrap(sendMessage('library:mutate', command));
+/** 提交一次导入；连接中断时不重试，后台拒绝时保留其业务错误码。 */
+export const importBackup = (request: ImportBackupRequest) => unwrap(sendMessage('library:import', request));
 /** 获取即时浏览器目录；不会使用持久化的旧 tabId。 */
 export const getSnapshot = () => unwrap(sendMessage('browser:getSnapshot'));
 /** 读取保存前的固定快照，取消确认不会发生副作用。 */

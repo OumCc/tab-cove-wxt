@@ -1,8 +1,10 @@
 /** 预览专用适配器，所有窗口和数据都是隔离 fixture，不能操作真实 Chrome。 */
 import { createLibraryRepository } from '../../src/services/libraryRepository.ts';
+import { AppError } from '../../src/services/libraryModel.ts';
 import { operate, previewSave, type BrowserPort } from '../../src/entrypoints/background/modules/tabOperations/service.ts';
 import type { BrowserOperation, BrowserSnapshot, LiveTab, TabSource } from '../../src/types/browser.ts';
 import type { LibraryCommand } from '../../src/types/core.ts';
+import type { ImportBackupRequest } from '../../src/types/backup.ts';
 const listeners = new Set<() => void>();
 const storageListeners = new Set<(changes: object, area: string) => void>();
 let seq = 0;
@@ -26,7 +28,7 @@ const fixture = { schemaVersion: 1, revision: 0, preferences: { saveDisposition:
   { id: 'design', name: 'Design', collections: [] },
 ] };
 let value = JSON.parse(localStorage.getItem('tab-cove-preview') || JSON.stringify(fixture));
-const repo = createLibraryRepository({ get: async () => structuredClone(value), set: async v => { value = structuredClone(v); localStorage.setItem('tab-cove-preview', JSON.stringify(v)); storageListeners.forEach(fn => fn({ tabCoveLibrary: {} }, 'local')); } }, () => crypto.randomUUID());
+const repo = createLibraryRepository({ get: async () => structuredClone(value), set: async v => { localStorage.setItem('tab-cove-preview', JSON.stringify(v)); value = structuredClone(v); storageListeners.forEach(fn => fn({ tabCoveLibrary: {} }, 'local')); } }, () => crypto.randomUUID());
 let tabs: LiveTab[] = [
   ['Figma – Onboarding v3', 'https://figma.com/design/example'], ['Pull request #482', 'https://github.com/example/project/pull/482'], ['Hacker News', 'https://news.ycombinator.com/'], ['Calendar – This week', 'https://calendar.google.com/'], ['Weekly metrics – Dashboard', 'https://example.com/metrics'],
 ].map(([title, url], index) => ({ id: index + 1, windowId: 1, index, title: title!, url: url!, groupId: index < 2 ? 10 : -1, pinned: false, active: index === 0 }));
@@ -47,13 +49,14 @@ export const browser = { runtime: { getURL: (part: string) => new URL(part, loca
 export async function sendMessage(type: string, data?: unknown) {
   try {
     let result: unknown;
-    if (type === 'library:get') result = await repo.get();
+    if (type === 'library:get') result = await repo.get(data as Parameters<typeof repo.get>[0]);
     if (type === 'library:mutate') result = await repo.mutate(data as LibraryCommand);
+    if (type === 'library:import') result = await repo.importBackup(data as ImportBackupRequest);
     if (type === 'browser:getSnapshot') result = { epoch: 'preview', sequence: ++seq, groupsAvailable: true, windows: [{ id: 1, focused: true, tabs: structuredClone(tabs), groups: structuredClone(groups) }] } satisfies BrowserSnapshot;
     if (type === 'browser:previewSave') result = await previewSave(port, data as TabSource);
     if (type === 'browser:operate') { result = await operate(port, repo, data as BrowserOperation); listeners.forEach(fn => fn()); }
     return { ok: true, value: result };
-  } catch (error) { return { ok: false, message: error instanceof Error ? error.message : 'Preview failed', code: 'INVALID_INPUT' }; }
+  } catch (error) { return { ok: false, message: error instanceof Error ? error.message : 'Preview failed', code: error instanceof AppError ? error.code : 'BROWSER_OPERATION_FAILED' }; }
 }
 /** 预览事件订阅与卸载。 */
 export function onMessage(_type: string, listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener); }; }

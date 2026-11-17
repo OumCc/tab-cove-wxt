@@ -30,8 +30,9 @@ export default defineBackground(() => {
     try { groups = (await browser.tabGroups.query({})).map(g => ({ ...g, title: g.title || '' })); } catch { groupsAvailable = false; }
     return { epoch, sequence: querySequence, groupsAvailable, windows: windows.map(w => ({ id: w.id!, focused: w.focused, tabs: (w.tabs || []).filter(isVisibleBrowserTab).map(liveTab).sort((a, b) => a.index - b.index), groups: groups.filter(g => g.windowId === w.id) })) };
   }
-  onMessage('library:get', () => result(() => repo.get()));
+  onMessage('library:get', ({ data }) => result(() => repo.get(data)));
   onMessage('library:mutate', ({ data }) => result(() => repo.mutate(data)));
+  onMessage('library:import', ({ data }) => result(() => repo.importBackup(data)));
   onMessage('browser:getSnapshot', () => result(snapshot));
   onMessage('browser:previewSave', ({ data }) => result(() => previewSave(chromePort, data)));
   onMessage('browser:operate', async ({ data }) => { const response = await result(() => operate(chromePort, repo, data)); changed(); return response; });

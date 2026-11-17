@@ -24,5 +24,5 @@ export type LibraryCommand =
 export type SaveTarget =
   | { collectionId: string; beforeId?: string }
   | { spaceId: string; name: string; beforeId?: string; groupColor?: GroupColor };
-export type ErrorCode = 'INVALID_INPUT' | 'NOT_FOUND' | 'STORAGE_READ_FAILED' | 'STORAGE_WRITE_FAILED' | 'UNSUPPORTED_SCHEMA' | 'BROWSER_OPERATION_FAILED';
+export type ErrorCode = 'INVALID_INPUT' | 'NOT_FOUND' | 'STORAGE_READ_FAILED' | 'STORAGE_WRITE_FAILED' | 'UNSUPPORTED_SCHEMA' | 'BROWSER_OPERATION_FAILED' | 'IMPORT_CONFLICT';
 export type Result<T> = { ok: true; value: T } | { ok: false; code: ErrorCode; message: string };
