@@ -67,4 +67,4 @@ pnpm run preview:ui
 
 打开终端打印的本地地址。预览复用实际 UI 和领域服务，浏览器目录使用隔离 fixture，收藏写入该预览 origin 的 localStorage；不会操作用户的真实窗口。预览不能用于证明 Chrome API、后台生命周期、离线扩展或拖拽的端到端正确性。测试文件不会打入生产扩展。
 
-当前 63 条 Node 单元测试通过，类型检查和生产构建通过。生产构建存在单个 JavaScript chunk 超过 500 kB 的提示，不影响产物生成。参见 [备份与迁移验证记录](openspec/changes/add-library-import-export/validation.md) 和 [首版工作台验证记录](openspec/changes/rebuild-local-tab-workspace/validation.md)。
+当前 63 条 Node 单元测试通过，类型检查和生产构建通过。生产构建存在单个 JavaScript chunk 超过 500 kB 的提示，不影响产物生成。参见 [备份与迁移验证记录](openspec/changes/archive/2026-11-17-add-library-import-export/validation.md) 和 [首版工作台验证记录](openspec/changes/archive/2026-11-17-rebuild-local-tab-workspace/validation.md)。
