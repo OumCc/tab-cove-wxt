@@ -238,6 +238,7 @@ function Workspace() {
           } });
         },
         save: source => run(() => save(source)), focus: tab => run(() => perform({ type: 'focus', tabId: tab.id })), close: tab => run(() => perform({ type: 'close', tabId: tab.id })),
+        closeTabs: (windowId, groupId) => run(() => perform({ type: 'closeTabs', windowId, groupId })),
         collapse: group => run(() => perform({ type: 'editGroup', groupId: group.id, collapsed: !group.collapsed })),
         ungroup: group => run(() => perform({ type: 'ungroup', groupId: group.id })),
         editGroup: group => form({ title: t('Edit tab group'), fields: [{ key: 'name', label: t('Group name'), value: group.title, optional: true }, { key: 'color', label: t('Color'), value: group.color, options: Object.keys(groupColors).map(color => ({ value: color, label: t((color.charAt(0).toUpperCase() + color.slice(1)) as MessageKey) })) }], onSubmit: v => perform({ type: 'editGroup', groupId: group.id, title: v.name, color: v.color as keyof typeof groupColors }) }),

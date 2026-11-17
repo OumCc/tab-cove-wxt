@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createChromePort, liveTab } from '../src/entrypoints/background/modules/tabOperations/chromeAdapter.ts';
+import { operate } from '../src/entrypoints/background/modules/tabOperations/service.ts';
 
 const workspaceUrl = 'chrome-extension://fixture/tabCove.html';
 function fixture() {
@@ -105,4 +106,54 @@ test('other extensions and pending extension navigation are excluded while Chrom
   f.tabs.get(2).pendingUrl = 'chrome-extension://another-extension/popup.html';
   f.tabs.get(3).url = 'chrome://settings/';
   assert.deepEqual((await f.port.getTabs(10)).map(t => t.id), [3, 4]);
+});
+
+test('bulk window close includes pinned and grouped tabs while keeping extension pages and other windows', async () => {
+  const f = fixture();
+  f.tabs.get(1).pinned = true;
+  f.tabs.get(2).groupId = 7;
+  f.tabs.get(3).pendingUrl = workspaceUrl;
+  f.tabs.get(4).windowId = 20;
+  f.tabs.set(5, { ...f.tabs.get(1), id: 5, pinned: false, url: workspaceUrl });
+  f.groups.get(7).windowId = 10;
+
+  const result = await operate(f.port, undefined, { type: 'closeTabs', windowId: 10 });
+
+  assert.deepEqual(result.failures, []);
+  assert.deepEqual(f.calls, [['remove', 1], ['remove', 2]]);
+  assert.deepEqual([...f.tabs.keys()], [3, 4, 5]);
+});
+
+test('bulk group close removes all members of a collapsed group', async () => {
+  const f = fixture();
+  Object.assign(f.groups.get(7), { windowId: 10, collapsed: true });
+  f.tabs.get(1).groupId = 7;
+  f.tabs.get(2).groupId = 7;
+  f.tabs.get(3).groupId = 8;
+
+  const result = await operate(f.port, undefined, { type: 'closeTabs', windowId: 10, groupId: 7 });
+
+  assert.deepEqual(result.failures, []);
+  assert.deepEqual([...f.tabs.keys()], [3, 4]);
+});
+
+test('bulk close keeps tabs moved out of scope and continues closing other members', async () => {
+  for (const patch of [{ windowId: 20 }, { groupId: -1 }]) {
+    const f = fixture();
+    f.groups.get(7).windowId = 10;
+    f.tabs.get(1).groupId = 7;
+    f.tabs.get(2).groupId = 7;
+    const query = f.api.tabs.query;
+    f.api.tabs.query = async filter => {
+      const selected = await query(filter);
+      Object.assign(f.tabs.get(1), patch);
+      return selected;
+    };
+
+    const result = await operate(f.port, undefined, { type: 'closeTabs', windowId: 10, groupId: 7 });
+
+    assert.deepEqual(f.calls, [['remove', 2]]);
+    assert.deepEqual(result.failures, ['Page 1: could not be closed.']);
+    assert.ok(f.tabs.has(1));
+  }
 });

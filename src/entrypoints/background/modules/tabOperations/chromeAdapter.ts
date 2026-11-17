@@ -47,7 +47,14 @@ export function createChromePort(browser: typeof BrowserApi): BrowserPort {
     async getTabs(windowId) { await checkWindow(windowId); return (await browser.tabs.query({ windowId })).filter(isVisibleBrowserTab).map(liveTab); },
     async getGroup(id) { const group = await browser.tabGroups.get(id); await checkWindow(group.windowId); return { ...group, title: group.title || '' }; },
     async focus(id) { const tab = await checkTab(id); await browser.tabs.update(id, { active: true }); await browser.windows.update(tab.windowId, { focused: true }); },
-    async close(id) { await checkTab(id); await browser.tabs.remove(id); },
+    async close(id, scope) {
+      const tab = await checkTab(id);
+      // 批量关闭过程中，用户可能把标签移出目标窗口或分组。
+      if (scope && (tab.windowId !== scope.windowId || (scope.groupId !== undefined && (tab.groupId ?? -1) !== scope.groupId))) {
+        throw new AppError('NOT_FOUND', 'The tab has moved out of the selected window or group.');
+      }
+      await browser.tabs.remove(id);
+    },
     async move(id, target) {
       const tab = await checkTab(id); if (tab.pinned) throw new AppError('INVALID_INPUT', 'Unpin this tab before moving it.');
       if (target.beforeTabId === id) return;

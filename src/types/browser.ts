@@ -13,6 +13,7 @@ export interface OperationReport { message: string; failures: string[]; retry?: 
 export type BrowserOperation = { locale?: Locale } & (
   | { type: 'focus'; tabId: number }
   | { type: 'close'; tabId: number }
+  | { type: 'closeTabs'; windowId: number; groupId?: number }
   | { type: 'move'; tabId: number; target: OpenTarget }
   | { type: 'editGroup'; groupId: number; title?: string; color?: GroupColor; collapsed?: boolean }
   | { type: 'ungroup'; groupId: number }

@@ -1,4 +1,4 @@
-/** 会话编排：先保存再关闭；浏览器部分失败返回可针对性重试的剩余操作。 */
+/** 会话编排：将浏览器命令限制在指定范围内，保存会话时先持久化再关闭，并报告部分失败。 */
 import { countLabel, sessionName, translate } from '../../../../i18n/core.ts';
 import type { MessageKey } from '../../../../i18n/messages.ts';
 import { AppError, validUrl } from '../../../../services/libraryModel.ts';
@@ -10,7 +10,8 @@ export interface BrowserPort {
   getTabs(windowId: number): Promise<LiveTab[]>;
   getGroup(id: number): Promise<LiveGroup>;
   focus(id: number): Promise<void>;
-  close(id: number): Promise<void>;
+  /** 批量关闭时复查标签仍在指定窗口或组内，移出范围的标签保留。 */
+  close(id: number, scope?: { windowId: number; groupId?: number }): Promise<void>;
   move(id: number, target: OpenTarget): Promise<void>;
   editGroup(id: number, patch: { title?: string; color?: GroupColor; collapsed?: boolean }): Promise<void>;
   ungroup(id: number): Promise<void>;
@@ -36,6 +37,16 @@ export async function operate(port: BrowserPort, repo: Repository, operation: Br
   switch (operation.type) {
     case 'focus': await port.focus(operation.tabId); break;
     case 'close': await port.close(operation.tabId); break;
+    case 'closeTabs': {
+      const tabs = await port.getTabs(operation.windowId);
+      for (const tab of tabs) {
+        if (operation.groupId !== undefined && tab.groupId !== operation.groupId) continue;
+        try { await port.close(tab.id, operation); }
+        catch { report.failures.push(t('{name}: could not be closed.', { name: tab.title })); }
+      }
+      if (report.failures.length) report.message = t('Could not close all tabs.');
+      break;
+    }
     case 'move': await port.move(operation.tabId, operation.target); break;
     case 'editGroup': await port.editGroup(operation.groupId, { ...(operation.title !== undefined ? { title: operation.title } : {}), ...(operation.color !== undefined ? { color: operation.color } : {}), ...(operation.collapsed !== undefined ? { collapsed: operation.collapsed } : {}) }); break;
     case 'ungroup': await port.ungroup(operation.groupId); break;

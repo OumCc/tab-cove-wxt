@@ -9,6 +9,7 @@ import { DropZone, Favicon, MoreMenu, Tool, groupColors, type DragItem } from '.
 export interface BrowserActions {
   move(tab: LiveTab, target?: OpenTarget): void;
   save(source: TabSource): void; focus(tab: LiveTab): void; close(tab: LiveTab): void;
+  closeTabs(windowId: number, groupId?: number): void;
   editGroup(group: LiveGroup): void; ungroup(group: LiveGroup): void; collapse(group: LiveGroup): void;
   startDrag(event: DragEvent, item: DragItem): void; drop(target: OpenTarget): void;
 }
@@ -43,17 +44,26 @@ export function OpenTabs({ snapshot, currentWindowId, error, refresh, drag, acti
     <div className="windows">
       {snapshot?.windows.map((w, wi) => {
         const rendered = new Set<number>();
+        const isCurrentWindow = w.id === currentWindowId;
+        const windowName = isCurrentWindow ? t('This window') : t('Window {number}', { number: wi + 1 });
         return <section className="browser-window" key={w.id}>
-          <div className="window-title"><button onClick={() => setClosed(prev => { const next = new Set(prev); next.has(w.id) ? next.delete(w.id) : next.add(w.id); return next; })} aria-expanded={!closed.has(w.id)}>{closed.has(w.id) ? <IconChevronRight size={15} /> : <IconChevronDown size={15} />}{w.id === currentWindowId ? t('This window') : t('Window {number}', { number: wi + 1 })}</button></div>
-          <div className="window-tools"><span>{count('tabs', w.tabs.length)}</span><Tool label={t('Save session in {name}', { name: w.id === currentWindowId ? t('This window') : t('Window {number}', { number: wi + 1 }) })} disabled={!w.tabs.some(t => !t.pinned && validUrl(t.url))} onClick={() => actions.save({ windowId: w.id })}><IconDownload size={17} /></Tool></div>
+          <div className="window-title">
+            <button onClick={() => setClosed(prev => { const next = new Set(prev); next.has(w.id) ? next.delete(w.id) : next.add(w.id); return next; })} aria-expanded={!closed.has(w.id)}>{closed.has(w.id) ? <IconChevronRight size={15} /> : <IconChevronDown size={15} />}{windowName}</button>
+            <Tool label={isCurrentWindow ? t('Close all tabs in this window') : t('Close all tabs in window {number}', { number: wi + 1 })} disabled={!w.tabs.length} onClick={() => actions.closeTabs(w.id)}><IconX size={15} /></Tool>
+          </div>
+          <div className="window-tools"><span>{count('tabs', w.tabs.length)}</span><Tool label={t('Save session in {name}', { name: windowName })} disabled={!w.tabs.some(t => !t.pinned && validUrl(t.url))} onClick={() => actions.save({ windowId: w.id })}><IconDownload size={17} /></Tool></div>
           {!closed.has(w.id) && <>
             {w.tabs.map(tab => {
               const group = w.groups.find(g => g.id === tab.groupId);
               if (!group) return row(tab, { windowId: w.id });
               if (rendered.has(group.id)) return null; rendered.add(group.id);
               const members = w.tabs.filter(t => t.groupId === group.id);
+              const groupName = group.title || t('Unnamed group');
               return <div className="native-group" key={`group-${group.id}`} style={{ '--group-color': groupColors[group.color] } as CSSProperties}>
-                <div className="group-title"><button onClick={() => actions.collapse(group)} aria-expanded={!group.collapsed}><span className="group-dot" />{group.title || t('Unnamed group')}{group.collapsed ? <IconChevronRight size={14} /> : <IconChevronDown size={14} />}</button></div>
+                <div className="group-title">
+                  <button onClick={() => actions.collapse(group)} aria-expanded={!group.collapsed}><span className="group-dot" />{groupName}{group.collapsed ? <IconChevronRight size={14} /> : <IconChevronDown size={14} />}</button>
+                  <Tool label={t('Close all tabs in group {name}', { name: groupName })} onClick={() => actions.closeTabs(w.id, group.id)}><IconX size={14} /></Tool>
+                </div>
                 <div className="group-tools"><span>{count('tabs', members.length)}</span><Tool label={t('Save group {name}', { name: group.title })} onClick={() => actions.save({ windowId: w.id, groupId: group.id })}><IconDownload size={15} /></Tool><Tool label={t('Edit group {name}', { name: group.title })} onClick={() => actions.editGroup(group)}><IconEdit size={15} /></Tool><Tool label={t('Ungroup {name}', { name: group.title })} onClick={() => actions.ungroup(group)}><IconLayoutDistributeHorizontal size={15} /></Tool></div>
                 {!group.collapsed && members.map(t => row(t, { windowId: w.id, groupId: group.id }))}
                 {accepting && <DropZone active label={t('Add to group')} onDrop={() => actions.drop({ windowId: w.id, groupId: group.id })} className="live-end" />}

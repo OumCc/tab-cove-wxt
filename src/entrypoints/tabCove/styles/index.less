@@ -100,7 +100,8 @@ button { -webkit-tap-highlight-color: transparent; }
 .panel-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding: 0 4px; }
 .panel-title h2 { margin: 0; font-size: 15px; font-weight: 600; color: var(--tc-text-strong); }
 .browser-window { border-top: 1px solid var(--tc-border); padding-top: 14px; margin-bottom: 18px; }
-.window-title > button, .group-title > button { display: flex; align-items: center; gap: 5px; color: inherit; background: transparent; border: 0; text-align: left; width: 100%; padding: 0; overflow-wrap: anywhere; }
+.window-title, .group-title { display: flex; align-items: center; gap: 4px; }
+.window-title > [aria-expanded], .group-title > [aria-expanded] { display: flex; align-items: center; flex: 1; min-width: 0; gap: 5px; color: inherit; background: transparent; border: 0; text-align: left; padding: 0; overflow-wrap: anywhere; }
 .window-title { font-size: 13px; font-weight: 500; color: var(--tc-text-strong); margin: 0 4px 2px; }
 .window-tools, .group-tools { display: flex; align-items: center; gap: 2px; font-size: 11px; color: var(--tc-text-muted); margin: 0 4px 8px; }
 .window-tools > span, .group-tools > span { flex: 1; }
@@ -117,7 +118,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .native-group { border-left: 2px solid var(--group-color); background: color-mix(in srgb, var(--tc-hover) 60%, transparent); border-radius: 0 8px 8px 0; padding: 8px 6px 1px; margin: 0 0 8px; }
 .group-title { margin: 0 3px 2px; font-size: 12px; }
 .group-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--group-color); flex-shrink: 0; }
-.group-tools .tool { width: 23px; height: 24px; }
+.group-title .tool, .group-tools .tool { width: 23px; height: 24px; }
 .group-tools { margin: 0 3px 6px; }
 .live-drop.drop-over { box-shadow: 0 -3px var(--tc-accent); outline: none; }
 .live-end { min-height: 30px; border: 1px dashed color-mix(in srgb, var(--tc-accent) 45%, transparent); border-radius: 7px; margin: 8px 0; }
