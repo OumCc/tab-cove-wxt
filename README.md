@@ -2,6 +2,26 @@
 
 基于 WXT、React、TypeScript、Mantine、Zustand 的单机 Chrome 标签工作台。保留独立页面入口，点击扩展图标打开或聚焦工作台，不接管 Chrome 新标签页。
 
+## 下载与安装
+
+1. 打开 [GitHub Releases](https://github.com/OumCc/tab-cove-wxt/releases)，在发布页的 **Assets** 中下载 `tab-cove-wxt-<版本>-chrome.zip`。`Source code (zip)` 是源码归档。
+2. 把 ZIP 解压到长期保留的目录，记下直接包含 `manifest.json` 的目录路径。
+3. 在桌面版 Chrome 打开 `chrome://extensions`，开启「开发者模式」，点击「加载已解压的扩展程序」，选择上一步的目录。
+4. 在 Chrome 工具栏的扩展菜单中固定 Tab Cove，点击图标打开工作台。
+
+### 手动更新
+
+GitHub 安装版需要手动更新。先在 Tab Cove 的「数据管理」中[下载 JSON 备份](#备份与迁移)，再将新版 ZIP 解压覆盖到原安装目录，回到 `chrome://extensions` 点击 Tab Cove 的「重新加载」。保留原安装路径可保持扩展 ID 和本地资料库。若需要换目录或浏览器配置文件，可安装后导入备份。卸载会删除当前扩展的本地资料库。
+
+### 权限与数据
+
+- `tabs` 读取打开标签的标题和网址，以便展示、保存和恢复标签。
+- `tabGroups` 读取和管理 Chrome 原生标签组。
+- `favicon` 显示网站图标。
+- `storage` 将收藏和界面偏好保存在当前 Chrome 配置文件中。
+
+Tab Cove 无需账号，资料库保存在本机，无云同步。
+
 ![隔离数据预览](docs/workspace-preview.jpg)
 
 ## 首版能力
@@ -26,6 +46,8 @@ pnpm run build
 ```
 
 在 Chrome 扩展管理页面打开开发者模式，选择“加载已解压的扩展程序”，加载本项目的 `.output/chrome-mv3` 目录。固定 Tab Cove 图标并点击即可进入。更新代码后重新构建，再在扩展管理页点击重新加载。开发使用 `pnpm run dev`。
+
+发布时运行 `pnpm run zip`，将 `.output/tab-cove-wxt-<版本>-chrome.zip` 上传到对应版本的 GitHub Release。
 
 ## 界面语言
 
@@ -67,4 +89,4 @@ pnpm run preview:ui
 
 打开终端打印的本地地址。预览复用实际 UI 和领域服务，浏览器目录使用隔离 fixture，收藏写入该预览 origin 的 localStorage；不会操作用户的真实窗口。预览不能用于证明 Chrome API、后台生命周期、离线扩展或拖拽的端到端正确性。测试文件不会打入生产扩展。
 
-当前 63 条 Node 单元测试通过，类型检查和生产构建通过。生产构建存在单个 JavaScript chunk 超过 500 kB 的提示，不影响产物生成。参见 [备份与迁移验证记录](openspec/changes/archive/2026-11-17-add-library-import-export/validation.md) 和 [首版工作台验证记录](openspec/changes/archive/2026-11-17-rebuild-local-tab-workspace/validation.md)。
+当前 74 条 Node 单元测试通过，类型检查和生产构建通过。生产构建存在单个 JavaScript chunk 超过 500 kB 的提示，不影响产物生成。参见 [备份与迁移验证记录](openspec/changes/archive/2026-11-17-add-library-import-export/validation.md) 和 [首版工作台验证记录](openspec/changes/archive/2026-11-17-rebuild-local-tab-workspace/validation.md)。
