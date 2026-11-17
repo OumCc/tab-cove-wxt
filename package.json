@@ -2,7 +2,7 @@
   "name": "tab-cove-wxt",
   "description": "A tabs manage extension.",
   "author": "OumCc. <369724377@qq.com>",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "engines": {
     "node": ">= 24.12.0",

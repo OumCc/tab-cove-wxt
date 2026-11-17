@@ -15,7 +15,7 @@ import type { Collection, GroupColor, LibraryCommand, SavedTab, SaveTarget } fro
 import type { BrowserOperation, OpenTarget, OperationReport, TabSource } from '../../types/browser.ts';
 import { Board, type BoardActions } from './components/Board';
 import { OpenTabs } from './components/OpenTabs';
-import { ChoiceDialog, EditorDialog, OpenSelectedTabsDialog, type EditorConfig } from './components/Dialogs';
+import { ChoiceDialog, EditorDialog, type EditorConfig } from './components/Dialogs';
 import { DataTransferDialog } from './components/DataTransferDialog';
 import { Search, type SearchResult } from './components/Search';
 import { DropZone, MoreMenu, Tool, groupColorLabel, type DragItem } from './components/ui';
@@ -33,7 +33,6 @@ function Workspace() {
   const { library, snapshot, spaceId } = state;
   const spaceIndex = library?.spaces.findIndex(s => s.id === spaceId) ?? -1; const space = library?.spaces[spaceIndex];
   const [editor, setEditor] = useState<EditorConfig>(); const [choice, setChoice] = useState<ChoiceConfig>();
-  const [openSelection, setOpenSelection] = useState<{ collection: Collection; trigger: HTMLButtonElement }>();
   const [dataTransferOpen, setDataTransferOpen] = useState(false);
   const dataTransferTrigger = useRef<HTMLButtonElement>(null);
   const [search, setSearch] = useState(false); const [collapsed, setCollapsed] = useState(new Set<string>());
@@ -59,13 +58,13 @@ function Workspace() {
   useEffect(() => {
     const keys = (event: KeyboardEvent) => {
       if (event.key === 'Escape') clearDrag();
-      if (event.isComposing || editor || choice || openSelection || search || dataTransferOpen) return;
+      if (event.isComposing || editor || choice || search || dataTransferOpen) return;
       const input = event.target instanceof HTMLElement && (event.target.matches('input,textarea,select') || event.target.isContentEditable);
       if ((!input && event.key === '/') || ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k')) { event.preventDefault(); if (library) setSearch(true); }
     };
     window.addEventListener('keydown', keys); window.addEventListener('dragend', clearDrag);
     return () => { window.removeEventListener('keydown', keys); window.removeEventListener('dragend', clearDrag); };
-  }, [editor, choice, openSelection, search, library, dataTransferOpen]);
+  }, [editor, choice, search, library, dataTransferOpen]);
   useEffect(() => () => clearDrag(), []);
 
   function run(task: () => Promise<unknown>) { void task().catch(error => notifications.show({ closeButtonProps: { 'aria-label': t('Close') }, color: 'red', title: t('Could not complete action'), message: errorMessage(error), autoClose: false })); }
@@ -162,7 +161,7 @@ function Workspace() {
     setGroupColor: (c, color) => run(() => mutate({ type: 'collection:setGroupColor', id: c.id, groupColor: color })),
     remove: c => confirm(t('Delete collection?'), t('Delete {name} and its {tabs}? Open browser tabs will stay open.', { name: c.name, tabs: count('tabs', c.tabs.length) }), () => mutate({ type: 'collection:delete', id: c.id })),
     open: openCollection,
-    selectTabsToOpen: (collection, trigger) => setOpenSelection({ collection, trigger }),
+    openSelected: openCollectionItems,
     save: c => run(() => save({ windowId: windowTarget().windowId }, { collectionId: c.id })),
     move: c => form({ title: t('Move collection'), fields: [{ key: 'space', label: t('Destination space'), value: space!.id, options: library!.spaces.map(s => ({ value: s.id, label: s.name })) }], onSubmit: v => mutate({ type: 'collection:move', id: c.id, spaceId: v.space! }) }),
     reorder: (c, beforeId) => run(() => mutate({ type: 'collection:move', id: c.id, spaceId: space!.id, beforeId })),
@@ -222,7 +221,11 @@ function Workspace() {
         <header className="space-header"><div className="space-title"><span className={`space-symbol color-${spaceIndex % 5}`}>{space.name.slice(0, 1).toUpperCase()}</span><h1>{space.name}</h1><span className="space-stats">{count('collections', space.collections.length)} <span>·</span> {count('tabs', space.collections.reduce((n, c) => n + c.tabs.length, 0))}</span></div></header>
         <div className="board-toolbar"><div className="toolbar-left"><span className="order-label"><IconArrowDown size={15} />{t('Custom order')}</span><span className="toolbar-divider" /><Tool label={t('Expand all collections')} onClick={() => setCollapsed(new Set())}><IconPlus size={19} /></Tool><Tool label={t('Collapse all collections')} onClick={() => setCollapsed(new Set(space.collections.map(c => c.id)))}><IconMinus size={19} /></Tool></div><button className="primary-button" onClick={() => boardActions.create()}><IconPlus size={18} />{t('New Collection')}</button></div>
         {library?.preferences.saveDisposition !== 'ask' && <div className="preference-note">{t(library?.preferences.saveDisposition === 'close' ? 'Saved tabs will be closed after saving.' : 'Saved tabs will stay open.')} <button className="text-button" onClick={settings}>{t('Change')}</button></div>}
-        <Board space={space} collapsed={collapsed} toggle={id => setCollapsed(prev => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; })} drag={drag} actions={boardActions} />
+        <Board key={space.id} space={space} collapsed={collapsed}
+          toggle={id => setCollapsed(prev => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; })}
+          restoreMode={library!.preferences.restoreMode} groupsAvailable={snapshot?.groupsAvailable !== false}
+          drag={drag} actions={boardActions}
+        />
       </fieldset>}
       {busy && <div className="busy-status" role="status">{t('Saving changes…')}</div>}
     </main>
@@ -250,11 +253,6 @@ function Workspace() {
     </fieldset></aside>
     {editor && <EditorDialog key={editor.key} config={editor} onClose={() => setEditor(undefined)} />}
     {choice && <ChoiceDialog {...choice} onClose={() => setChoice(undefined)} />}
-    {openSelection && library && <OpenSelectedTabsDialog
-      collection={openSelection.collection} mode={library.preferences.restoreMode} groupsAvailable={snapshot?.groupsAvailable !== false}
-      onOpen={(items, group, remember) => openCollectionItems(openSelection.collection, items, group, remember)}
-      onClose={() => { setOpenSelection(undefined); requestAnimationFrame(() => openSelection.trigger.focus({ preventScroll: true })); }}
-    />}
     {dataTransferOpen && <DataTransferDialog onClose={() => { setDataTransferOpen(false); requestAnimationFrame(() => dataTransferTrigger.current?.focus()); }} />}
     {search && library && <Search library={library} snapshot={snapshot} onOpen={searchOpen} onJump={jump} onClose={() => setSearch(false)} />}
   </div>;

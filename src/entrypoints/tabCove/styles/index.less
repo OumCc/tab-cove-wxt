@@ -75,13 +75,24 @@ button { -webkit-tap-highlight-color: transparent; }
 .collection-color:hover:not(:disabled), .collection-color[aria-expanded='true'] { background: var(--tc-hover); color: var(--tc-text-strong); }
 .collection-color-swatch { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .collection-tools { display: flex; gap: 4px; opacity: .5; }
-.collection:hover .collection-tools, .collection:focus-within .collection-tools { opacity: 1; }
+.collection:hover .collection-tools, .collection:focus-within .collection-tools, .collection-tools:has(.collection-selection-open) { opacity: 1; }
+.collection-selection-open { height: 28px; white-space: nowrap; font-size: 12px; }
+.collection-selection-open[aria-disabled='true'] { background: var(--tc-accent); opacity: .45; cursor: default; }
+.collection-selection-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 16px; padding: 6px 8px; margin: 0 0 10px; border: 1px solid var(--tc-border); border-radius: 8px; background: var(--tc-surface); color: var(--tc-text-muted); font-size: 12px; }
+.collection-selection-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.collection-selection-remember { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.collection-selection-remember input, .card-select input { margin: 0; accent-color: var(--tc-accent); cursor: pointer; }
 .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
 .tab-card { position: relative; background: var(--tc-surface); border: 1px solid var(--tc-border); border-radius: 10px; min-height: 84px; transition: border-color .15s; cursor: grab; }
 .tab-card:hover { border-color: var(--tc-border-strong); }
 .card-open { display: grid; grid-template-columns: 20px minmax(0, 1fr); grid-template-rows: auto auto; gap: 10px 8px; align-items: center; width: 100%; min-height: 82px; border: 0; background: none; color: inherit; text-align: left; padding: 14px; border-radius: inherit; }
 .card-title { font-size: 13px; font-weight: 500; color: var(--tc-text-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .card-open small { grid-column: 1 / -1; color: var(--tc-text-subtle); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card-select { cursor: pointer; user-select: none; }
+.card-select .card-title { margin-right: 24px; }
+.card-select input { position: absolute; top: 14px; right: 14px; width: 16px; height: 16px; }
+.card-select:has(:focus-visible) { outline: 2px solid var(--tc-accent); outline-offset: 2px; }
+.tab-card:has(.card-select input:checked) { border-color: var(--tc-accent); background: var(--tc-selected); }
 .favicon { display: inline-grid; place-items: center; width: 20px; height: 20px; flex-shrink: 0; background: var(--tc-hover); color: var(--tc-text-muted); border-radius: 5px; font-size: 10px; font-weight: 600; }
 .favicon img { width: 16px; height: 16px; object-fit: contain; }
 .card-delete, .card-tools { position: absolute; right: 8px; opacity: 0; pointer-events: none; }
@@ -94,8 +105,8 @@ button { -webkit-tap-highlight-color: transparent; }
 /* 更多菜单渲染在卡片外，展开期间也要显示触发按钮。 */
 .tab-card:is(:hover, :focus-within, :has(.card-tools > [aria-expanded='true'])) {
   > .card-delete, > .card-tools { opacity: 1; pointer-events: auto; }
-  .card-title { margin-right: 24px; }
-  .card-open small { margin-right: 72px; }
+  button.card-open .card-title { margin-right: 24px; }
+  button.card-open small { margin-right: 72px; }
 }
 .drop-zone { min-width: 0; }
 .drop-zone > span { display: none; }
