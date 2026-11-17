@@ -47,7 +47,7 @@ pnpm run build
 
 在 Chrome 扩展管理页面打开开发者模式，选择“加载已解压的扩展程序”，加载本项目的 `.output/chrome-mv3` 目录。固定 Tab Cove 图标并点击即可进入。更新代码后重新构建，再在扩展管理页点击重新加载。开发使用 `pnpm run dev`。
 
-发布时运行 `pnpm run zip`，将 `.output/tab-cove-wxt-<版本>-chrome.zip` 上传到对应版本的 GitHub Release。
+维护者可按 [GitHub 发布流程](docs/release.md) 打包、上传并验证下载。
 
 ## 界面语言
 
