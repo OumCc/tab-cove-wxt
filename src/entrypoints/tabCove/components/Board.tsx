@@ -2,7 +2,7 @@
 import type { DragEvent } from 'react';
 import { useI18n, t, count } from '../../../i18n/index.ts';
 import { Menu } from '@mantine/core';
-import { IconArrowDown, IconArrowUp, IconArrowsMove, IconArrowsShuffle, IconCheck, IconChevronDown, IconChevronRight, IconDownload, IconEdit, IconExternalLink, IconGripVertical, IconPlus, IconStack2, IconTrash } from '@tabler/icons-react';
+import { IconArrowDown, IconArrowUp, IconArrowsMove, IconArrowsShuffle, IconCheck, IconChevronDown, IconChevronRight, IconDownload, IconEdit, IconExternalLink, IconGripVertical, IconListCheck, IconPlus, IconStack2, IconTrash } from '@tabler/icons-react';
 import { GROUP_COLORS } from '../../../services/libraryModel.ts';
 import type { Collection, GroupColor, SavedTab, Space } from '../../../types/core.ts';
 import { DropZone, Favicon, MoreMenu, Tool, groupColorLabel, groupColors, type DragItem } from './ui';
@@ -11,6 +11,8 @@ export interface BoardActions {
   /** 保存固定组色，传入 null 时恢复为随机颜色。 */
   setGroupColor(collection: Collection, color: GroupColor | null): void;
   open(collection: Collection): void; save(collection: Collection): void; move(collection: Collection): void;
+  /** 显示本次打开的选项，关闭弹窗时将焦点还给触发按钮。 */
+  selectTabsToOpen(collection: Collection, trigger: HTMLButtonElement): void;
   mergeCollection(collection: Collection): void;
   newCollectionFromTab(tab: SavedTab): void;
   reorder(collection: Collection, beforeId?: string): void;
@@ -73,6 +75,7 @@ export function Board({ space, collapsed, toggle, drag, actions }: { space: Spac
           </div>
           <div className="collection-tools">
             <Tool label={t('Open all tabs in {name}', { name: c.name })} disabled={!c.tabs.length} onClick={() => actions.open(c)}><IconExternalLink size={18} /></Tool>
+            <Tool label={t('Open selected tabs in {name}', { name: c.name })} title={t('Open selected tabs')} aria-haspopup="dialog" disabled={!c.tabs.length} onClick={event => actions.selectTabsToOpen(c, event.currentTarget)}><IconListCheck size={18} aria-hidden="true" /></Tool>
             <Tool label={t('Save session into {name}', { name: c.name })} onClick={() => actions.save(c)}><IconDownload size={18} /></Tool>
             <MoreMenu label={t('Options for {name}', { name: c.name })}>
               <Menu.Item leftSection={<IconEdit size={16} />} onClick={() => actions.rename(c)}>{t('Rename')}</Menu.Item>
