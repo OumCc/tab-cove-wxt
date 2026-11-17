@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Tab Cove">
+  <rect width="128" height="128" rx="28" fill="#4f5bd5"/>
+  <path d="M88 40A34 34 0 1 0 88 88" fill="none" stroke="#ffffff" stroke-width="13" stroke-linecap="round"/>
+  <rect x="49" y="51" width="30" height="26" rx="8" fill="#c5caf8"/>
+</svg>

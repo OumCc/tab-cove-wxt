@@ -1,0 +1,14 @@
+{
+  "extensionName": {
+    "message": "Tab Cove"
+  },
+  "extensionDescription": {
+    "message": "Organize tabs, collections, and browser sessions locally."
+  },
+  "actionTitle": {
+    "message": "Open Tab Cove"
+  },
+  "defaultSpaceName": {
+    "message": "Personal"
+  }
+}
